@@ -1,31 +1,42 @@
-import { PhidgetReactConfig, Store  } from './types'
-import { createStore } from './store'
-import  { useEffect, useState, EffectCallback, DependencyList } from 'react'
+import {
+    useEffect, useState, EffectCallback, DependencyList,
+} from 'react'
+import {
+    PhidgetReactConfig, Store, Logger, LogLevel,
+} from './types'
+import { createStore, unwrapStore } from './store'
 import { EnvironmentObject } from './environment'
+import { createLogger } from './logger'
 
 type EffectHook = { (effect: EffectCallback, deps?: DependencyList): void }
 
 export const createPhidgetReactHook = (
-    config: PhidgetReactConfig, logger?: any
-):[EffectHook, EffectHook] => {
-    EnvironmentObject.logger = logger
+    config: PhidgetReactConfig, logLevel?: LogLevel, logger?: Logger,
+) => {
+    // Set up logger
+    EnvironmentObject.logger = createLogger(logger, logLevel)
+
+    // Set up stores
+    EnvironmentObject.stores = {
+        ...EnvironmentObject.stores,
+        system$: unwrapStore(createStore()),
+        phidget$: unwrapStore(createStore()),
+    }
+
+    const { system$, phidget$ } = EnvironmentObject.stores
 
     const createDefaultSystemStatus = () => {
         const { name, phidgetHost } = config
 
-        return ({ 
-            [name]: { phidgetHost }
+        return ({
+            [name]: { phidgetHost },
         })
     }
 
     const defaultSystemStatus = createDefaultSystemStatus()
 
-    //set up stores
-    const system$: Store = createStore()
-    const phidget$: Store = createStore()
-    
     // This hook listens to system events from the phidget
-    const usePhidgetSystem = () => {    
+    const usePhidgetSystem = () => {
         const [system, setSystem] = useState(defaultSystemStatus)
 
         useEffect(() => {
@@ -35,7 +46,7 @@ export const createPhidgetReactHook = (
         return system
     }
 
-     // This hook listens to the actual data from the phidget
+    // This hook listens to the actual data from the phidget
     const usePhidget = () => {
         const [phidget, setPhidget] = useState({})
 
@@ -46,5 +57,5 @@ export const createPhidgetReactHook = (
         return phidget
     }
 
-   return [usePhidget, usePhidgetSystem ] 
+    return [usePhidget, usePhidgetSystem]
 }

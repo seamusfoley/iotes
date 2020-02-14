@@ -1,8 +1,13 @@
 import { Store, Dispatchable, State } from '../types'
+import { EnvironmentObject } from '../environment'
+
+interface WrappedStore extends Store {
+    isWrapped: boolean
+}
 
 export const createStore = (
     errorHandler?: (error: Error, currentState?: State) => State
-): Store =>  {
+): WrappedStore =>  {
     type ShouldUpdateState = boolean
     
     let state: State = {}
@@ -32,6 +37,21 @@ export const createStore = (
 
     return {
         dispatch,
-        subscribe
+        subscribe,
+        isWrapped: true
     }
+}
+
+const nullStore = {
+    dispatch: (dispatchable: Dispatchable) => {},
+    subscribe: (subscriber: (state: State) => void) => {}
+}
+
+export const unwrapStore = (store: WrappedStore | undefined ): Store => {
+    if (!store){
+        EnvironmentObject.logger.warn('Attempted to access undefined store, returning non functional null store in it\'s place')
+        return nullStore
+    }
+
+    return store
 }

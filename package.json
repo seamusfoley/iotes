@@ -15,8 +15,10 @@
   "license": "ISC",
   "dependencies": {
     "@types/react": "^16.9.19",
+    "@wethecurious/phidget22-bundle": "^2.5.1",
     "dmx": "^0.2.4",
     "mqtt": "^3.0.0",
+    "phidget22": "^2.5.1",
     "react": "^16.12.0",
     "rxjs": "^6.5.4"
   },
