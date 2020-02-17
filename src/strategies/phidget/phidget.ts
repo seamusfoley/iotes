@@ -7,8 +7,8 @@ import {
     DeviceDispatchable,
     HostDispatchable,
     HostConnectionType,
-} from '../types'
-import { RfidReader, RotaryEncoder } from './types'
+} from '../../types'
+import { RfidReader } from '../types'
 
 const createDeviceFactory = (
     hostConfig: HostConfig,

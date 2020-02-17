@@ -1,11 +1,12 @@
 {
-  "name": "mqtt-dmx-bridge",
+  "name": "phiget-react",
   "version": "0.0.1",
-  "description": "Creates an mqtt client which listens form actions and runs dmx scripts in response",
-  "main": "dist/index.js",
+  "description": "Creates an intergration between phidget devices and react making for much more reliable intergraiton of the stateful phidget api and stateless react components",
+  "main": "packages/module/index.js",
   "scripts": {
     "start": "npm run watch",
     "build": "tsc",
+    "lint": "eslint ./src/**/*.ts",
     "test": "jest ./test --detectOpenHandles",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
     "watch-ts": "tsc -w",
@@ -16,11 +17,8 @@
   "dependencies": {
     "@types/react": "^16.9.19",
     "@wethecurious/phidget22-bundle": "^2.5.1",
-    "dmx": "^0.2.4",
     "mqtt": "^3.0.0",
-    "phidget22": "^2.5.1",
-    "react": "^16.12.0",
-    "rxjs": "^6.5.4"
+    "react": "^16.12.0"
   },
   "devDependencies": {
     "eslint-plugin-jest": "^23.6.0",

@@ -7,7 +7,7 @@ import {
     DeviceDispatchable,
     HostDispatchable,
     HostConnectionType,
-} from '../types'
+} from '../../types'
 
 const createDeviceFactory = (
     hostConfig: HostConfig,

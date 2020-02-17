@@ -28,9 +28,7 @@ export const createPhidgetReactHook = async (
     phidget$.subscribe((state) => console.log(state))
 
 
-    await createIntergration()
-
-
+    // await createIntergration()
 
     /*
     // This hook listens to system events from the phidget
@@ -56,5 +54,5 @@ export const createPhidgetReactHook = async (
     }
     */
 
-    return [usePhidget, usePhidgetSystem]
+    // return [usePhidget, usePhidgetSystem]
 }

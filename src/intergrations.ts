@@ -1,15 +1,13 @@
 
-import { createIntergration } from "./intergration"
-import { PhidgetReactConfig, DeviceDefinition } from './types'
+import { createIntergration } from './intergration'
+import { PhidgetReactConfig, DeviceConfig } from './types'
 
-type DeviceMap = DeviceDefinition[]
+type DeviceMap = DeviceConfig[]
 
-const createIntergrations = (config: PhidgetReactConfig) => (deviceMap: DeviceMap) => {
-    const { isMockWithMQTT } = config
+export const createIntergrations = (config: PhidgetReactConfig) => (
+    deviceMap: DeviceMap, strategy: any,
+) => (
+    // const { isMockWithMQTT } = config
 
-    return createIntergration(
-        deviceMap,
-        config,
-        strategy,
-    )
-}
+    createIntergration({ deviceMap, config, strategy })
+)
