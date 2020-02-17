@@ -1,29 +1,27 @@
-/* eslint-disable no-unused-vars */
-import { IntergrationDefinition, DeviceDefinition } from '../types'
-import { createNullIntergrationDefinition } from './null'
-/* eslint-enable no-unused-vars */
+import { DeviceConfig } from '../types'
+
+interface Strategy {
+    createHost: any
+    createDeviceFactory: any
+}
+
 
 export const createIntergration = async ({
+    config,
     deviceMap = [],
-    intergrationDefinition,
-    dispatch,
-    systemDispatch,
+    strategy,
 } : {
-    deviceMap: any[],
-    intergrationDefinition: IntergrationDefinition,
-    dispatch: any,
-    systemDispatch: any
+    config: any,
+    deviceMap: DeviceConfig[],
+    strategy: Strategy
 }) => {
-    const nullIntergrationDefinition = await createNullIntergrationDefinition()
+    const { createHost, createDeviceFactory } = strategy
+    const { dispatch, systemDispatch } = config
 
-    deviceMap.forEach((device: DeviceDefinition) => (
-        intergrationDefinition[device.type]
-            ? intergrationDefinition[device.type](device)
-            : nullIntergrationDefinition[device.type](device)
-    ))
 
-    return {
-        connect: () => systemDispatch(() => console.log('connected')),
-        disconnect: () => systemDispatch('disconnected'),
-    }
+    const client = await createHost(config, dispatch, systemDispatch)
+    // eslint-disable-next-line max-len
+    const deviceFactory: any = await createDeviceFactory(client)
+
+    deviceMap.forEach((device: DeviceConfig) => deviceFactory[device.type](device))
 }

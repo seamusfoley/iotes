@@ -1,36 +1,58 @@
 
-export type IntergrationClientOptions = {
+// Hosts
+
+export type HostMap = HostConfig[]
+
+export type HostConfig = {
+    name: string
     host: string
     port: string
-    name: string
-    password: string
+    password?: string
+    strategy: string
 }
 
-export type Intergration = {
-    [key in DeviceType]: (name: string, channel: string, dispatch: Dispatchable) => void
-}
+export type HostConnectionType = 'CONNECT' | 'DISCONNECT' | 'RECONNECTING'
 
-export type IntergrationDefinition = { [key in DeviceType]: (device: DeviceDefinition) => void}
+export type HostFactory = Promise<(hostConfig: HostConfig) => HostConfig & any>
+
+// Devices
 
 export type DeviceType = 'RFID_READER' | 'ROTARY_ENCODER'
 
-export type DeviceDefinition = {
+export type DeviceMap = DeviceConfig[]
+
+export type DeviceConfig = {
     type: DeviceType
     name: string,
-    channel: number
-    dispatch: any
+    channel: number,
+    hostName: string
 }
 
-export interface PhidgetReactConfig {
-    name: string
-    phidgetHost: string
-    phdigetPassword?: string
+export type DeviceFactory = {
+    [key in 'RFID_READER' | 'ROTARY_ENCODER']: (device: DeviceConfig) => Promise<{type: DeviceType, name: string, channel: number}>
+}
+
+// Intergration
+
+export type IntergrationFactory = (
+    config: any,
+    deviceDispatch: () => Dispatchable,
+    clientDispatch: () => Dispatchable
+) => {
+    clientFactory: HostFactory,
+    deviceFactory: DeviceFactory,
+}
+
+
+export type PhidgetReactConfig = {
+    host: string
+    password?: string
     mqttHost?: string
-    isMockWithMQTT?: boolean
-    phidgetDevices: DeviceDefinition[]
+    strategy?: string
 }
 
-// Logging solution
+// Logger
+
 export interface Logger {
     log: (log: string) => any
     info: (info: string) => any
@@ -40,11 +62,28 @@ export interface Logger {
 
 export type LogLevel = 'SILENT' | 'INFO' | 'LOG' | 'WARN' | 'DEBUG'
 
-// State pushed to subscribers should have either strings or numbers as types
+// Dispatchables
+
 export type State = { [key: string]: any }
 
-// Disaptcable get unwrapped in the store object for predictable error handling
 export type Dispatchable = State | Error
+
+type ErrorDispatchable = {
+    isError?: boolean,
+    error?: { message: string, code?: string, level: LogLevel }
+}
+
+export type DeviceDispatchable = {[deviceName: string] : {
+    type: string,
+    meta: { timestamp: string, channel: string, host: string },
+    payload: {[key: string]: any}
+} | Error }
+
+export type HostDispatchable = {[deviceName: string] : {
+    type: HostConnectionType
+    meta: { timestamp: string, channel: string, host: string }
+    payload: {[key: string]: any}
+} & ErrorDispatchable }
 
 export interface Store {
     dispatch: (dispatchable: Dispatchable) => void

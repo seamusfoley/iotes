@@ -7,10 +7,9 @@ import {
 import { createStore, unwrapStore } from './store'
 import { EnvironmentObject } from './environment'
 import { createLogger } from './logger'
+import { createIntergration } from './intergration'
 
-type EffectHook = { (effect: EffectCallback, deps?: DependencyList): void }
-
-export const createPhidgetReactHook = (
+export const createPhidgetReactHook = async (
     config: PhidgetReactConfig, logLevel?: LogLevel, logger?: Logger,
 ) => {
     // Set up logger
@@ -25,19 +24,18 @@ export const createPhidgetReactHook = (
 
     const { system$, phidget$ } = EnvironmentObject.stores
 
-    const createDefaultSystemStatus = () => {
-        const { name, phidgetHost } = config
+    system$.subscribe((state) => console.log(state))
+    phidget$.subscribe((state) => console.log(state))
 
-        return ({
-            [name]: { phidgetHost },
-        })
-    }
 
-    const defaultSystemStatus = createDefaultSystemStatus()
+    await createIntergration()
 
+
+
+    /*
     // This hook listens to system events from the phidget
     const usePhidgetSystem = () => {
-        const [system, setSystem] = useState(defaultSystemStatus)
+        const [system, setSystem] = useState({})
 
         useEffect(() => {
             system$.subscribe((state) => setSystem(state))
@@ -56,6 +54,7 @@ export const createPhidgetReactHook = (
 
         return phidget
     }
+    */
 
     return [usePhidget, usePhidgetSystem]
 }
