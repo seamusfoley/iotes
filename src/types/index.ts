@@ -6,12 +6,11 @@ export type HostConfig = {
     host: string
     port: string
     password?: string
-    strategy: string
 }
 
 export type HostConnectionType = 'CONNECT' | 'DISCONNECT' | 'RECONNECTING'
 
-export type HostFactory = (hostConfig: HostConfig) => Promise<HostConfig & any>
+export type HostFactory = (hostConfig: HostConfig) => Promise<DeviceFactory>
 
 // Devices
 export type DeviceType = 'RFID_READER' | 'ROTARY_ENCODER'
@@ -30,15 +29,10 @@ export type DeviceFactory = {
 }
 
 // Intergration
-export type IntergrationFactory = (
-    config: any,
-    deviceDispatch: () => Dispatchable,
-    clientDispatch: () => Dispatchable
-) => {
-    clientFactory: HostFactory,
-    deviceFactory: DeviceFactory,
-}
-
+export type Intergration = (
+    hostFactory: HostFactory,
+    topologyMap: TopologyMap
+) => void
 
 export type PhidgetReactConfig = {
     host: string

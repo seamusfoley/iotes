@@ -9,6 +9,7 @@ import {
     HostConnectionType,
     Strategy,
 } from '../../types'
+import { EnvironmentObject } from '../../environment'
 
 const createDeviceFactory = (
     hostConfig: HostConfig,
@@ -51,20 +52,24 @@ export const createMqttStrategy: Strategy = (
 ): HostFactory => async (
     hostConfig: HostConfig,
 ): Promise<DeviceFactory> => {
+    const { logger } = EnvironmentObject
+
     const { name } = hostConfig
-    const hostPath = `mqtt://${hostConfig.host}:${hostConfig.port}`
+    const hostPath = `ws://${hostConfig.host}:${hostConfig.port}`
 
     const connect = async (): Promise<MqttClient> => (
         new Promise((res, reject) => {
             try {
                 res(mqtt.connect(hostPath))
-            } catch {
-                reject(Error('because'))
+            } catch (error) {
+                reject(Error(error))
             }
         })
     )
 
     const host = await connect()
+
+    logger.info(`mqtt host config: ${JSON.stringify(host.options, null, 2)}`)
 
     const createHostDispatchable = (type: HostConnectionType): HostDispatchable => ({
         [name]: {
@@ -86,11 +91,11 @@ export const createMqttStrategy: Strategy = (
         },
     })
 
-    host.on('connected', () => {
+    host.on('connect', () => {
         hostDispatch(createHostDispatchable('CONNECT'))
     })
 
-    host.on('reconnected', () => {
+    host.on('reconnect', () => {
         hostDispatch(createHostDispatchable('CONNECT'))
     })
 
@@ -102,8 +107,8 @@ export const createMqttStrategy: Strategy = (
         hostDispatch(createHostDispatchable('DISCONNECT'))
     })
 
-    host.on('reconnecting', () => {
-        hostDispatch(createHostDispatchable('RECONNECTING'))
+    host.on('subscribe', () => {
+        hostDispatch(createHostDispatchable('CONNECT'))
     })
 
     host.on('message', (topic: string, message: string) => {

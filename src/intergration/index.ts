@@ -1,29 +1,32 @@
 import {
-    DeviceConfig,
     HostConfig,
     DeviceFactory,
+    Intergration,
     HostFactory,
     TopologyMap,
 } from '../types'
-
-
-type Intergration = (
-    hostFactory: HostFactory,
-    topologyMap: TopologyMap
-) => void
+import { EnvironmentObject } from '../environment'
 
 export const createIntergration: Intergration = async (
-    hostFactory,
-    topologyMap,
-) => {
+    hostFactory: HostFactory,
+    topologyMap: TopologyMap,
+): Promise<void> => {
+    const { logger } = EnvironmentObject
+
     const { hosts, devices } = topologyMap
+
+    logger.info(`Creating info with topology map: ${JSON.stringify(topologyMap, null, 2)}`)
 
     const hostFactories = await Promise.all(hosts.map(async (
         hostConfig: HostConfig,
-    ) => (
-        [hostConfig.name, await hostFactory(hostConfig)]
-    )))
+    ) => {
+        const host = await hostFactory(hostConfig)
+        return [hostConfig.name, host]
+    }))
 
+    logger.info(`Host Factories: ${JSON.stringify(hostFactories, null, 2)}`)
+
+    // Combine returned device factories into indexed collection
     const deviceFactories = hostFactories.reduce((
         a: { [name: string]: DeviceFactory },
         v: [string, DeviceFactory],
@@ -31,7 +34,7 @@ export const createIntergration: Intergration = async (
         { ...a, [v[0]]: v[1] }
     ), {})
 
-    Promise.all(devices.map((device) => (
+    await Promise.all(devices.map(async (device) => (
         // Select device creation method from correct host
         deviceFactories[device.hostName][device.type](device)
     )))

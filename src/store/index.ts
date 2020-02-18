@@ -22,17 +22,17 @@ export const createStore = (
     }
 
     const unwrapDispatchable = (dispatchable: Dispatchable): [State, ShouldUpdateState] => {
-        if (dispatchable instanceof Error) return [errorHandler(dispatchable, state), true]
-        return [state, false]
+        if (dispatchable instanceof Error) return [errorHandler(dispatchable, state), false]
+        return [dispatchable, true]
     }
 
     const setState = (newState: State, callback: () => void) => {
         state = { ...state, ...newState }
+        callback()
     }
 
     const dispatch = (dispatchable: Dispatchable) => {
         const [newState, shouldUpdateState] = unwrapDispatchable(dispatchable)
-
         if (shouldUpdateState) setState(newState, updateSubscribers)
     }
 
@@ -44,8 +44,8 @@ export const createStore = (
 }
 
 const nullStore = {
-    dispatch: (dispatchable: Dispatchable) => {},
-    subscribe: (subscriber: (state: State) => void) => {},
+    dispatch: (_: Dispatchable) => {},
+    subscribe: (_: (state: State) => void) => {},
 }
 
 export const unwrapStore = (store: WrappedStore | undefined): Store => {

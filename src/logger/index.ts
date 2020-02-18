@@ -28,7 +28,7 @@ const defaultLogger: Logger = {
 
 export const createLogger = (
     logger: Logger = defaultLogger,
-    logLevel: LogLevel = 'DEBUG',
+    logLevel: LogLevel = 'SILENT',
 ): Logger => (
     logConditionally(logLevel)(logger)
 )

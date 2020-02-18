@@ -4,6 +4,8 @@ import { createServer as createNetServer } from 'net'
 import { createServer as createHttpServer } from 'http'
 import ws from 'websocket-stream'
 
+export { createTestClient } from './client'
+
 export const createTestMqttBroker = async () => {
     const aedes = createAedes()
     const netServer = createNetServer(aedes.handle)

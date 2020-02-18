@@ -1,4 +1,4 @@
-import phidget22 from '@wethecurious/phidget22-bundle'
+import phidget22 from 'phidget22'
 import {
     DeviceFactory,
     HostFactory,

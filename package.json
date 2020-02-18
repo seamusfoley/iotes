@@ -7,7 +7,7 @@
     "start": "npm run watch",
     "build": "tsc",
     "lint": "eslint ./src/**/*.ts",
-    "test": "jest ./test --detectOpenHandles",
+    "test": "jest ./test",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
     "watch-ts": "tsc -w",
     "watch-node": "nodemon dist/run.js"
@@ -18,21 +18,23 @@
     "@types/react": "^16.9.19",
     "@wethecurious/phidget22-bundle": "^2.5.1",
     "mqtt": "^3.0.0",
+    "phidget22": "^2.6.1",
     "react": "^16.12.0"
   },
   "devDependencies": {
-    "eslint-plugin-jest": "^23.6.0",
-    "concurrently": "^5.1.0",
     "@types/jest": "^25.1.1",
     "@types/node": "^13.7.0",
     "@typescript-eslint/eslint-plugin": "^2.19.0",
     "@typescript-eslint/parser": "^2.19.0",
     "aedes": "^0.40.1",
+    "concurrently": "^5.1.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jest": "^23.6.0",
     "jest": "^25.1.0",
     "ts-jest": "^25.2.0",
-    "typescript": "^3.7.5"
+    "typescript": "^3.7.5",
+    "websocket-stream": "^5.5.0"
   }
 }
