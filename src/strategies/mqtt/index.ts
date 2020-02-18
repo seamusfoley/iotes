@@ -7,6 +7,7 @@ import {
     DeviceDispatchable,
     HostDispatchable,
     HostConnectionType,
+    Strategy,
 } from '../../types'
 
 const createDeviceFactory = (
@@ -44,14 +45,26 @@ const createDeviceFactory = (
     }
 }
 
-export const createMqttStrategy = async (
-    hostConfig: HostConfig,
+export const createMqttStrategy: Strategy = (
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
     hostDispatch: (dispatchable: HostDispatchable) => void,
-):Promise<HostFactory> => (): DeviceFactory => {
+): HostFactory => async (
+    hostConfig: HostConfig,
+): Promise<DeviceFactory> => {
     const { name } = hostConfig
     const hostPath = `mqtt://${hostConfig.host}:${hostConfig.port}`
-    const host = mqtt.connect(hostPath)
+
+    const connect = async (): Promise<MqttClient> => (
+        new Promise((res, reject) => {
+            try {
+                res(mqtt.connect(hostPath))
+            } catch {
+                reject(Error('because'))
+            }
+        })
+    )
+
+    const host = await connect()
 
     const createHostDispatchable = (type: HostConnectionType): HostDispatchable => ({
         [name]: {

@@ -1,6 +1,4 @@
-
 // Hosts
-
 export type HostMap = HostConfig[]
 
 export type HostConfig = {
@@ -13,10 +11,9 @@ export type HostConfig = {
 
 export type HostConnectionType = 'CONNECT' | 'DISCONNECT' | 'RECONNECTING'
 
-export type HostFactory = Promise<(hostConfig: HostConfig) => HostConfig & any>
+export type HostFactory = (hostConfig: HostConfig) => Promise<HostConfig & any>
 
 // Devices
-
 export type DeviceType = 'RFID_READER' | 'ROTARY_ENCODER'
 
 export type DeviceMap = DeviceConfig[]
@@ -33,7 +30,6 @@ export type DeviceFactory = {
 }
 
 // Intergration
-
 export type IntergrationFactory = (
     config: any,
     deviceDispatch: () => Dispatchable,
@@ -52,7 +48,6 @@ export type PhidgetReactConfig = {
 }
 
 // Logger
-
 export interface Logger {
     log: (log: string) => any
     info: (info: string) => any
@@ -63,7 +58,6 @@ export interface Logger {
 export type LogLevel = 'SILENT' | 'INFO' | 'LOG' | 'WARN' | 'DEBUG'
 
 // Dispatchables
-
 export type State = { [key: string]: any }
 
 export type Dispatchable = State | Error
@@ -89,3 +83,11 @@ export interface Store {
     dispatch: (dispatchable: Dispatchable) => void
     subscribe: (subscriber: (state: State) => void) => void
 }
+
+// Strategy
+export type TopologyMap = { hosts: HostConfig[], devices: DeviceConfig[] }
+
+export type Strategy = (
+    deviceDispatch: (dispatchable: DeviceDispatchable) => void,
+    hostDispatch: (dispatchable: HostDispatchable) => void,
+) => HostFactory

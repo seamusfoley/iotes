@@ -7,6 +7,7 @@ import {
     DeviceDispatchable,
     HostDispatchable,
     HostConnectionType,
+    Strategy,
 } from '../../types'
 import { RfidReader } from '../types'
 
@@ -78,11 +79,12 @@ const createDeviceFactory = (
     }
 }
 
-export const createMqttStrategy = async (
-    hostConfig: HostConfig,
+export const createPhidgetStrategy: Strategy = (
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
     hostDispatch: (dispatchable: HostDispatchable) => void,
-):Promise<HostFactory> => async (): Promise<DeviceFactory> => {
+): HostFactory => async (
+    hostConfig: HostConfig,
+): Promise<DeviceFactory> => {
     const { name } = hostConfig
     const hostPath = `http://${hostConfig.host}:${hostConfig.port}`
 

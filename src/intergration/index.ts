@@ -1,27 +1,38 @@
-import { DeviceConfig } from '../types'
-
-interface Strategy {
-    createHost: any
-    createDeviceFactory: any
-}
-
-
-export const createIntergration = async ({
-    config,
-    deviceMap = [],
-    strategy,
-} : {
-    config: any,
-    deviceMap: DeviceConfig[],
-    strategy: Strategy
-}) => {
-    const { createHost, createDeviceFactory } = strategy
-    const { dispatch, systemDispatch } = config
+import {
+    DeviceConfig,
+    HostConfig,
+    DeviceFactory,
+    HostFactory,
+    TopologyMap,
+} from '../types'
 
 
-    const client = await createHost(config, dispatch, systemDispatch)
-    // eslint-disable-next-line max-len
-    const deviceFactory: any = await createDeviceFactory(client)
+type Intergration = (
+    hostFactory: HostFactory,
+    topologyMap: TopologyMap
+) => void
 
-    deviceMap.forEach((device: DeviceConfig) => deviceFactory[device.type](device))
+export const createIntergration: Intergration = async (
+    hostFactory,
+    topologyMap,
+) => {
+    const { hosts, devices } = topologyMap
+
+    const hostFactories = await Promise.all(hosts.map(async (
+        hostConfig: HostConfig,
+    ) => (
+        [hostConfig.name, await hostFactory(hostConfig)]
+    )))
+
+    const deviceFactories = hostFactories.reduce((
+        a: { [name: string]: DeviceFactory },
+        v: [string, DeviceFactory],
+    ): { [name: string]: DeviceFactory } => (
+        { ...a, [v[0]]: v[1] }
+    ), {})
+
+    Promise.all(devices.map((device) => (
+        // Select device creation method from correct host
+        deviceFactories[device.hostName][device.type](device)
+    )))
 }
