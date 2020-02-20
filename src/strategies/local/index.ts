@@ -12,9 +12,19 @@ import {
 import { EnvironmentObject } from '../../environment'
 import { createStore } from '../../store'
 
+
+const createHostDispatchable = (name: string, type: HostConnectionType): HostDispatchable => ({
+    [name]: {
+        type,
+        meta: { timestamp: Date.now().toString(), channel: 'local', host: name },
+        payload: {},
+    },
+})
+
 const createDeviceFactory = (
     hostConfig: HostConfig,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
+    hostDispatch: (dispatchable: DeviceDispatchable) => void,
     subscribe: Store['subscribe'],
 ): DeviceFactory => {
     const createDeviceDispatchable = (
@@ -24,10 +34,16 @@ const createDeviceFactory = (
     ):DeviceDispatchable => ({
         [deviceName]: {
             type,
+            name: deviceName,
             meta: { timestamp: Date.now().toString(), channel: 'local', host: hostConfig.name },
             payload,
         },
     })
+
+    setTimeout(() => {
+        hostDispatch(createHostDispatchable(hostConfig.name, 'CONNECT'))
+    }, 10)
+
 
     // RFID READER
     const createRfidReader = async (
@@ -37,9 +53,11 @@ const createDeviceFactory = (
 
         let prevValue:any
 
-        deviceDispatch(
-            createDeviceDispatchable(type, name, { value: Date.now() }),
-        )
+        setTimeout(() => {
+            deviceDispatch(
+                createDeviceDispatchable(type, name, { value: Date.now() }),
+            )
+        }, 100)
 
         return device
     }
@@ -52,9 +70,11 @@ const createDeviceFactory = (
 
         // Register listeners
 
-        deviceDispatch(
-            createDeviceDispatchable(type, name, { value: Date.now() }),
-        )
+        setTimeout(() => {
+            deviceDispatch(
+                createDeviceDispatchable(type, name, { value: Date.now() }),
+            )
+        }, 100)
 
         return device
     }
@@ -78,23 +98,6 @@ export const createLocalStoreAndStrategy = ():[Store, Strategy] => {
 
         const { name } = hostConfig
 
-        const createHostDispatchable = (type: HostConnectionType): HostDispatchable => ({
-            [name]: {
-                type,
-                meta: { timestamp: Date.now().toString(), channel: 'local', host: name },
-                payload: {},
-            },
-        })
-
-        logger.log('CONNECT')
-
-        await new Promise((res: any, _: any) => {
-            setTimeout(() => {
-                hostDispatch(createHostDispatchable('CONNECT'))
-                res()
-            }, 100)
-        })
-
-        return createDeviceFactory(hostConfig, deviceDispatch, store$.subscribe)
+        return createDeviceFactory(hostConfig, deviceDispatch, hostDispatch, store$.subscribe)
     }]
 }

@@ -4,6 +4,7 @@ import { createMqttStrategy } from '../src/strategies/mqtt'
 import { createPhidgetReact } from '../src'
 import { createLocalStoreAndStrategy } from '../src/strategies/local'
 import { createStore } from '../src/store'
+import { resolve } from 'dns'
 
 const testTopologoy: TopologyMap = {
     hosts: [{ name: 'testapp/0', host: 'localhost', port: '8888' }],
@@ -152,10 +153,29 @@ describe('Strategy implementation ', () => {
         expect(localModule).toHaveProperty('deviceSubscribe')
     })
 
-    test('Intergration dispatches correctly', () => {
-        let result: any
-        localModule.systemSubscribe((state) => { result = state })
+    test('Intergration system dispatches correctly', async () => {
+        let result: any = null
+        localModule.systemSubscribe((state: any) => { result = state })
 
-        console.log(result)
+        await new Promise((res) => setInterval(() => {
+            if (result) {
+                res()
+            }
+        }, 10))
+
+        expect(result[testTopologoy.hosts[0].name].type).toBe('CONNECT')
+    })
+
+    test('Intergration decives dispatch correctly', async () => {
+        let result: any = null
+        localModule.deviceSubscribe((state: any) => { result = state })
+
+        await new Promise((res) => setInterval(() => {
+            if (result) {
+                res()
+            }
+        }, 10))
+
+        expect(result[testTopologoy.devices[0].name].type).toBe('RFID_READER')
     })
 })
