@@ -1,10 +1,9 @@
-import { createTestMqttBroker, createTestClient } from './testUtils'
 import { TopologyMap, Store, DeviceDispatchable } from '../src/types'
-import { createMqttStrategy } from '../src/strategies/mqtt'
 import { createPhidgetReact } from '../src'
 import { createLocalStoreAndStrategy } from '../src/strategies/local'
 import { createStore } from '../src/store'
-import { resolve } from 'dns'
+
+// Test data
 
 const testTopologoy: TopologyMap = {
     hosts: [{ name: 'testapp/0', host: 'localhost', port: '8888' }],
@@ -36,26 +35,16 @@ const createDeviceDispatchable = (
     },
 })
 
+// Tests
 
-// @ts-ignore
-let phidgetReact
-// @ts-ignore
-let testClient
-// @ts-ignore
-let testBroker
-let createLocalStrategy
+let createLocalStrategy: any
 let localStore: Store
-
-beforeAll(async () => {
-    // testBroker = await createTestMqttBroker()
-    // testClient = await createTestClient();
-    // [localStore, createLocalStrategy] = createLocalStoreAndStrategy()
-})
 
 afterAll(() => {
     localStore = null
-    // testBroker.stop()
 })
+
+/* Tests store module implementation only */
 
 describe('Store module ', () => {
     beforeEach(() => {
@@ -131,8 +120,10 @@ describe('Store module ', () => {
     })
 })
 
-let localModule: any
+/* Tests full strategy implementation. Uses local strategy as it intergration that uses timeouts to
+simulate devices being connected and/or disconnected */
 
+let localModule: any
 describe('Strategy implementation ', () => {
     beforeEach(async () => {
         [localStore, createLocalStrategy] = createLocalStoreAndStrategy()
@@ -151,6 +142,7 @@ describe('Strategy implementation ', () => {
         }).not.toThrowError()
         expect(localModule).toHaveProperty('systemSubscribe')
         expect(localModule).toHaveProperty('deviceSubscribe')
+        expect(localModule).toHaveProperty('deviceDispatch')
     })
 
     test('Intergration system dispatches correctly', async () => {
@@ -177,5 +169,21 @@ describe('Strategy implementation ', () => {
         }, 10))
 
         expect(result[testTopologoy.devices[0].name].type).toBe('RFID_READER')
+    })
+
+
+    test('App dispatched to Intergration decives correctly', async () => {
+        let result: any = null
+        const deviceName = 'READER/1'
+        const signal = 'test'
+        localStore.subscribe((state) => { result = state })
+        localModule.deviceDispatch({ name: deviceName, payload: { signal } })
+        await new Promise((res) => setInterval(() => {
+            if (result) {
+                res()
+            }
+        }, 100))
+
+        expect(result[deviceName].payload).toStrictEqual({ signal })
     })
 })

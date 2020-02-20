@@ -84,4 +84,5 @@ export type TopologyMap = { hosts: HostConfig[], devices: DeviceConfig[] }
 export type Strategy = (
     hostDispatch: (dispatchable: HostDispatchable) => void,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
+    deviceSubscribe: (subscriber: (state: State) => void) => void,
 ) => HostFactory

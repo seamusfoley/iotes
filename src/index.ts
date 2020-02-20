@@ -3,12 +3,12 @@ import {
     LogLevel,
     TopologyMap,
     Strategy,
+    Dispatchable,
 } from './types'
-import { createStore, unwrapStore } from './store'
+import { createStore } from './store'
 import { EnvironmentObject } from './environment'
 import { createLogger } from './logger'
 import { createIntergration } from './intergration'
-import { createPhidgetStrategy } from './strategies/phidget'
 
 export const createPhidgetReact = async (
     topology: TopologyMap,
@@ -31,13 +31,20 @@ export const createPhidgetReact = async (
     const { host$, device$ } = EnvironmentObject.stores
 
     try {
-        await createIntergration(strategy(host$.dispatch, device$.dispatch), topology)
+        await createIntergration(strategy(
+            host$.dispatch,
+            device$.dispatch,
+            device$.subscribe,
+        ), topology)
     } catch {
-        throw Error('Failied to create intergration. Did you pass function call instead of function?')
+        throw Error('Failied to create intergration. Did you pass the result of a function call instead of a function?')
     }
+
 
     return {
         systemSubscribe: host$.subscribe,
         deviceSubscribe: device$.subscribe,
+        // wrap dispatch with source value
+        deviceDispatch: (dispatchable: Dispatchable) => { device$.dispatch({ ...dispatchable, '@@source': 'app' }) },
     }
 }

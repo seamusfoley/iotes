@@ -24,8 +24,8 @@ const createHostDispatchable = (name: string, type: HostConnectionType): HostDis
 const createDeviceFactory = (
     hostConfig: HostConfig,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
-    hostDispatch: (dispatchable: DeviceDispatchable) => void,
-    subscribe: Store['subscribe'],
+    deviceSubscribe: any,
+    store: Store,
 ): DeviceFactory => {
     const createDeviceDispatchable = (
         type: string,
@@ -40,18 +40,21 @@ const createDeviceFactory = (
         },
     })
 
-    setTimeout(() => {
-        hostDispatch(createHostDispatchable(hostConfig.name, 'CONNECT'))
-    }, 10)
-
-
     // RFID READER
     const createRfidReader = async (
         device: DeviceConfig,
     ) => {
         const { name, type } = device
 
-        let prevValue:any
+        deviceSubscribe((state: any) => {
+            if (state.name === name && state['@@source'] === 'app') {
+                store.dispatch(createDeviceDispatchable(
+                    type,
+                    name,
+                    { signal: state.payload.signal },
+                ))
+            }
+        })
 
         setTimeout(() => {
             deviceDispatch(
@@ -67,6 +70,15 @@ const createDeviceFactory = (
         device: DeviceConfig,
     ) => {
         const { type, name } = device
+
+        // resigster trasmitter
+
+        deviceSubscribe((state: any) => {
+            if (state.name === name && state['@@source'] === 'app') {
+                console.log(`Transmit Thing ${name}`)
+            }
+        })
+
 
         // Register listeners
 
@@ -91,6 +103,7 @@ export const createLocalStoreAndStrategy = ():[Store, Strategy] => {
     return [store$, (
         hostDispatch: (dispatchable: HostDispatchable) => void,
         deviceDispatch: (dispatchable: DeviceDispatchable) => void,
+        deviceSubscribe: any,
     ): HostFactory => async (
         hostConfig: HostConfig,
     ): Promise<DeviceFactory> => {
@@ -98,6 +111,11 @@ export const createLocalStoreAndStrategy = ():[Store, Strategy] => {
 
         const { name } = hostConfig
 
-        return createDeviceFactory(hostConfig, deviceDispatch, hostDispatch, store$.subscribe)
+        // Test system dispatch
+        setTimeout(() => {
+            hostDispatch(createHostDispatchable(hostConfig.name, 'CONNECT'))
+        }, 10)
+
+        return createDeviceFactory(hostConfig, deviceDispatch, deviceSubscribe, store$)
     }]
 }
