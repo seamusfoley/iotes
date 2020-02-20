@@ -22,15 +22,19 @@ export const createPhidgetReact = async (
     // Set up stores
     EnvironmentObject.stores = {
         ...EnvironmentObject.stores,
-        host$: unwrapStore(createStore()),
-        device$: unwrapStore(createStore()),
+        host$: createStore(),
+        device$: createStore(),
     }
 
     EnvironmentObject.logger.info('Set up store')
 
     const { host$, device$ } = EnvironmentObject.stores
 
-    await createIntergration(strategy(host$.dispatch, device$.dispatch), topology)
+    try {
+        await createIntergration(strategy(host$.dispatch, device$.dispatch), topology)
+    } catch {
+        throw Error('Failied to create intergration. Did you pass function call instead of function?')
+    }
 
     return {
         systemSubscribe: host$.subscribe,

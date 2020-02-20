@@ -1,7 +1,9 @@
 import { createTestMqttBroker, createTestClient } from './testUtils'
-import { Logger, TopologyMap } from '../src/types'
+import { TopologyMap, Store, DeviceDispatchable } from '../src/types'
 import { createMqttStrategy } from '../src/strategies/mqtt'
 import { createPhidgetReact } from '../src'
+import { createLocalStoreAndStrategy } from '../src/strategies/local'
+import { createStore } from '../src/store'
 
 const testTopologoy: TopologyMap = {
     hosts: [{ name: 'testapp/0', host: 'localhost', port: '8888' }],
@@ -21,12 +23,17 @@ const testTopologoy: TopologyMap = {
     ],
 }
 
-const logger: Logger = {
-    log: (log) => {},
-    warn: (log) => {},
-    error: (log) => {},
-    info: (log) => {},
-}
+const createDeviceDispatchable = (
+    type: string,
+    deviceName: string,
+    payload: {[key: string] : any},
+):DeviceDispatchable => ({
+    [deviceName]: {
+        type,
+        meta: { timestamp: '1234', channel: 'local', host: 'local' },
+        payload,
+    },
+})
 
 
 // @ts-ignore
@@ -35,31 +42,120 @@ let phidgetReact
 let testClient
 // @ts-ignore
 let testBroker
+let createLocalStrategy
+let localStore: Store
 
 beforeAll(async () => {
-    testBroker = await createTestMqttBroker()
-    testClient = await createTestClient()
+    // testBroker = await createTestMqttBroker()
+    // testClient = await createTestClient();
+    // [localStore, createLocalStrategy] = createLocalStoreAndStrategy()
 })
 
 afterAll(() => {
-    testBroker.stop()
+    localStore = null
+    // testBroker.stop()
 })
 
-describe('phidget-react ', () => {
-    test('expect ', () => { expect(true).toBeTruthy() })
-
-    test('starts with correct config', async () => {
-        phidgetReact = await createPhidgetReact(testTopologoy, createMqttStrategy)
-        expect(phidgetReact).toHaveProperty('systemSubscribe')
-        expect(phidgetReact).toHaveProperty('deviceSubscribe')
+describe('Store module ', () => {
+    beforeEach(() => {
+        localStore = createStore()
     })
 
-    test('accepts subscription call back', () => {
-        expect(() => phidgetReact.systemSubscribe((state: any) => console.log(state))).not.toThrowError()
-        expect(() => phidgetReact.deviceSubscribe((state: any) => console.log(state))).not.toThrowError()
+    afterEach(() => {
+        localStore = null
     })
 
-    test('accepts data from mqtt mock', () => {
-        testClient.publish('testapp/0/phidget/READER/1/onTag', JSON.stringify({ type: 'THING', payload: {} }))
+    test('Can create Store ', () => {
+        expect(() => {
+            createStore()
+        }).not.toThrowError()
+        expect(localStore).toHaveProperty('subscribe')
+        expect(localStore).toHaveProperty('dispatch')
+    })
+
+    test('Can subscribe ', () => {
+        expect(() => localStore.subscribe((state) => state)).not.toThrowError()
+    })
+
+    test('Can dispatch ', () => {
+        let result: any = null
+        localStore.subscribe((state) => { result = state })
+        localStore.dispatch({ payload: 'test' })
+        expect(result.payload).toBe('test')
+    })
+
+    test('Handles malformed dispatch ', () => {
+        let result: any = null
+        localStore.subscribe((state) => { result = state })
+        // @ts-ignore
+        localStore.dispatch('what')
+        // @ts-ignore
+        localStore.dispatch(['thing', 'thing'])
+        // @ts-ignore
+        localStore.dispatch(1)
+        // @ts-ignore
+        localStore.dispatch({ payload: 'test' })
+        // @ts-ignore
+        localStore.dispatch('what')
+        // @ts-ignore
+        localStore.dispatch(['thing', 'thing'])
+        // @ts-ignore
+        localStore.dispatch(1)
+
+        expect(result).toStrictEqual({ payload: 'test' })
+    })
+
+    test('Handles multiple devices correctly', () => {
+        let result: any = null
+        localStore.subscribe((state) => { result = state })
+
+        localStore.dispatch(createDeviceDispatchable('RFID_READER', 'reader/1', { sample: 'test' }))
+        localStore.dispatch(createDeviceDispatchable('RFID_READER', 'reader/2', { sample: 'test' }))
+        localStore.dispatch(createDeviceDispatchable('RFID_READER', 'reader/1', { sample: 'newTest' }))
+
+        expect(result).toStrictEqual({
+            /* eslint-disable */
+            'reader/1': {
+                type: 'RFID_READER',
+                meta: { timestamp: '1234', channel: 'local', host: 'local' },
+                payload: { sample: 'newTest' }
+            },
+            'reader/2': {
+                type: 'RFID_READER',
+                meta: { timestamp: '1234', channel: 'local', host: 'local' },
+                payload: { sample: 'test' }
+            }
+            /* eslint-enable */
+        })
+    })
+})
+
+let localModule: any
+
+describe('Strategy implementation ', () => {
+    beforeEach(async () => {
+        [localStore, createLocalStrategy] = createLocalStoreAndStrategy()
+        localModule = await createPhidgetReact(testTopologoy, createLocalStrategy)
+            .catch((err) => { throw Error(err) })
+    })
+
+    afterEach(() => {
+        localModule = null
+    })
+
+    test('Can create intergration', () => {
+        expect(async () => {
+            localModule = await createPhidgetReact(testTopologoy, createLocalStrategy)
+                .catch((err) => { throw Error(err) })
+        }).not.toThrowError()
+        expect(localModule).toHaveProperty('systemSubscribe')
+        expect(localModule).toHaveProperty('deviceSubscribe')
+    })
+
+    test('Intergration dispatches correctly', () => {
+        let result: any
+        localModule.systemSubscribe((state) => { result = state })
+
+        console.log(result)
     })
 })

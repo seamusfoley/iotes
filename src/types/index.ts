@@ -82,6 +82,6 @@ export interface Store {
 export type TopologyMap = { hosts: HostConfig[], devices: DeviceConfig[] }
 
 export type Strategy = (
-    deviceDispatch: (dispatchable: DeviceDispatchable) => void,
     hostDispatch: (dispatchable: HostDispatchable) => void,
+    deviceDispatch: (dispatchable: DeviceDispatchable) => void,
 ) => HostFactory

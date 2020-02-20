@@ -80,8 +80,8 @@ const createDeviceFactory = (
 }
 
 export const createPhidgetStrategy: Strategy = (
-    deviceDispatch: (dispatchable: DeviceDispatchable) => void,
     hostDispatch: (dispatchable: HostDispatchable) => void,
+    deviceDispatch: (dispatchable: DeviceDispatchable) => void,
 ): HostFactory => async (
     hostConfig: HostConfig,
 ): Promise<DeviceFactory> => {

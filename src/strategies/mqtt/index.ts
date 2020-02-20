@@ -47,8 +47,8 @@ const createDeviceFactory = (
 }
 
 export const createMqttStrategy: Strategy = (
-    deviceDispatch: (dispatchable: DeviceDispatchable) => void,
     hostDispatch: (dispatchable: HostDispatchable) => void,
+    deviceDispatch: (dispatchable: DeviceDispatchable) => void,
 ): HostFactory => async (
     hostConfig: HostConfig,
 ): Promise<DeviceFactory> => {

@@ -7,7 +7,8 @@ interface WrappedStore extends Store {
 
 export const createStore = (
     errorHandler?: (error: Error, currentState?: State) => State,
-): WrappedStore => {
+): Store => {
+    const { logger } = EnvironmentObject
     type ShouldUpdateState = boolean
 
     let state: State = {}
@@ -21,9 +22,24 @@ export const createStore = (
         subscribers.forEach((subscriber) => subscriber(state))
     }
 
+    const isObjectLiteral = (predicate:{[key: string]: any}) => {
+        if (Object.getPrototypeOf(predicate) !== Object.getPrototypeOf({})) return false
+
+        let keys = []
+        try {
+            keys = Object.keys(predicate)
+            if (keys.length === 0) return false
+        } catch {
+            return false
+        }
+
+        return keys.reduce((a: boolean, v: string | number) => (predicate[v] ? a : false), true)
+    }
+
     const unwrapDispatchable = (dispatchable: Dispatchable): [State, ShouldUpdateState] => {
         if (dispatchable instanceof Error) return [errorHandler(dispatchable, state), false]
-        return [dispatchable, true]
+        if (isObjectLiteral(dispatchable)) return [dispatchable, true]
+        return [{}, false]
     }
 
     const setState = (newState: State, callback: () => void) => {
@@ -39,7 +55,6 @@ export const createStore = (
     return {
         dispatch,
         subscribe,
-        isWrapped: true,
     }
 }
 

@@ -21,8 +21,11 @@ export const createIntergration: Intergration = async (
         hostConfig: HostConfig,
     ) => {
         const host = await hostFactory(hostConfig)
+            .catch(() => { throw Error(`Failed to create Factory ${hostConfig.name})`) })
         return [hostConfig.name, host]
-    }))
+    })).catch(() => {
+        throw Error('Failed to create one of more Factories from topology map')
+    })
 
     logger.info(`Host Factories: ${JSON.stringify(hostFactories, null, 2)}`)
 
@@ -37,5 +40,8 @@ export const createIntergration: Intergration = async (
     await Promise.all(devices.map(async (device) => (
         // Select device creation method from correct host
         deviceFactories[device.hostName][device.type](device)
-    )))
+            .catch(() => { throw Error(`Failed to create Device ${device.name})`) })
+    ))).catch(() => {
+        throw Error('Failed to create Devices one of more Devices from topology map. Check chosen strategy has a method to handle the device type you need')
+    })
 }
