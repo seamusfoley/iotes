@@ -34,17 +34,19 @@ export const createPhidgetReact = async (
         await createIntergration(strategy(
             host$.dispatch,
             device$.dispatch,
+            host$.subscribe,
             device$.subscribe,
         ), topology)
-    } catch {
-        throw Error('Failied to create intergration. Did you pass the result of a function call instead of a function?')
+    } catch (error) {
+        if (error && error.length > 0) { throw Error(error) }
+        throw Error('Failed to create intergration for unknown reasons. Did you pass the result of a function call instead of a function?')
     }
 
-
     return {
-        systemSubscribe: host$.subscribe,
+        hostSubscribe: host$.subscribe,
         deviceSubscribe: device$.subscribe,
         // wrap dispatch with source value
-        deviceDispatch: (dispatchable: Dispatchable) => { device$.dispatch({ ...dispatchable, '@@source': 'app' }) },
+        hostDispatch: (dispatchable: Dispatchable) => { host$.dispatch({ ...dispatchable, '@@source': 'APP', '@@bus': 'SYSTEM' }) },
+        deviceDispatch: (dispatchable: Dispatchable) => { device$.dispatch({ ...dispatchable, '@@source': 'APP', '@@bus': 'DEVICE' }) },
     }
 }

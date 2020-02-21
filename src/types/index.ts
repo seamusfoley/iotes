@@ -69,6 +69,7 @@ export type DeviceDispatchable = {[deviceName: string] : {
 
 export type HostDispatchable = {[deviceName: string] : {
     type: HostConnectionType
+    name: string
     meta: { timestamp: string, channel: string, host: string }
     payload: {[key: string]: any}
 } & ErrorDispatchable }
@@ -84,5 +85,6 @@ export type TopologyMap = { hosts: HostConfig[], devices: DeviceConfig[] }
 export type Strategy = (
     hostDispatch: (dispatchable: HostDispatchable) => void,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
+    hostSubscribe: (subscriber: (state: State) => void) => void,
     deviceSubscribe: (subscriber: (state: State) => void) => void,
 ) => HostFactory

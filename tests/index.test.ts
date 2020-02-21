@@ -140,14 +140,15 @@ describe('Strategy implementation ', () => {
             localModule = await createPhidgetReact(testTopologoy, createLocalStrategy)
                 .catch((err) => { throw Error(err) })
         }).not.toThrowError()
-        expect(localModule).toHaveProperty('systemSubscribe')
+        expect(localModule).toHaveProperty('hostSubscribe')
         expect(localModule).toHaveProperty('deviceSubscribe')
+        expect(localModule).toHaveProperty('hostSubscribe')
         expect(localModule).toHaveProperty('deviceDispatch')
     })
 
-    test('Intergration system dispatches correctly', async () => {
+    test('Intergration host dispatches correctly', async () => {
         let result: any = null
-        localModule.systemSubscribe((state: any) => { result = state })
+        localModule.hostSubscribe((state: any) => { result = state })
 
         await new Promise((res) => setInterval(() => {
             if (result) {
@@ -172,7 +173,7 @@ describe('Strategy implementation ', () => {
     })
 
 
-    test('App dispatched to Intergration decives correctly', async () => {
+    test('App dispatched to intergration decives correctly', async () => {
         let result: any = null
         const deviceName = 'READER/1'
         const signal = 'test'
@@ -185,5 +186,20 @@ describe('Strategy implementation ', () => {
         }, 100))
 
         expect(result[deviceName].payload).toStrictEqual({ signal })
+    })
+
+    test('App dispatched to intergration host correctly', async () => {
+        let result: any = null
+        const hostName = 'testapp/0'
+        const signal = 'test'
+        localStore.subscribe((state) => { result = state })
+        localModule.hostDispatch({ name: hostName, payload: { signal } })
+        await new Promise((res) => setInterval(() => {
+            if (result) {
+                res()
+            }
+        }, 100))
+
+        expect(result[hostName].payload).toStrictEqual({ signal })
     })
 })

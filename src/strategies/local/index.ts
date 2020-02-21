@@ -13,11 +13,16 @@ import { EnvironmentObject } from '../../environment'
 import { createStore } from '../../store'
 
 
-const createHostDispatchable = (name: string, type: HostConnectionType): HostDispatchable => ({
+const createHostDispatchable = (
+    type: HostConnectionType,
+    name: string,
+    payload: { [key:string] :any } = {},
+): HostDispatchable => ({
     [name]: {
         type,
+        name,
         meta: { timestamp: Date.now().toString(), channel: 'local', host: name },
-        payload: {},
+        payload,
     },
 })
 
@@ -47,7 +52,8 @@ const createDeviceFactory = (
         const { name, type } = device
 
         deviceSubscribe((state: any) => {
-            if (state.name === name && state['@@source'] === 'app') {
+            // console.log(`device subscibe ${JSON.stringify(state, null, 2)}`)
+            if (state.name === name && state['@@source'] === 'APP') {
                 store.dispatch(createDeviceDispatchable(
                     type,
                     name,
@@ -74,7 +80,7 @@ const createDeviceFactory = (
         // resigster trasmitter
 
         deviceSubscribe((state: any) => {
-            if (state.name === name && state['@@source'] === 'app') {
+            if (state.name === name && state['@@source'] === 'APP') {
                 console.log(`Transmit Thing ${name}`)
             }
         })
@@ -103,6 +109,7 @@ export const createLocalStoreAndStrategy = ():[Store, Strategy] => {
     return [store$, (
         hostDispatch: (dispatchable: HostDispatchable) => void,
         deviceDispatch: (dispatchable: DeviceDispatchable) => void,
+        hostSubscribe: any,
         deviceSubscribe: any,
     ): HostFactory => async (
         hostConfig: HostConfig,
@@ -111,10 +118,21 @@ export const createLocalStoreAndStrategy = ():[Store, Strategy] => {
 
         const { name } = hostConfig
 
-        // Test system dispatch
+        // Test host dispatch
         setTimeout(() => {
-            hostDispatch(createHostDispatchable(hostConfig.name, 'CONNECT'))
+            hostDispatch(createHostDispatchable('CONNECT', hostConfig.name))
         }, 10)
+
+        hostSubscribe((state: any) => {
+            if (state.name === hostConfig.name && state['@@source'] === 'APP') {
+                store$.dispatch(createHostDispatchable(
+                    'CONNECT',
+                    hostConfig.name,
+                    { signal: 'test' },
+                ))
+            }
+        })
+
 
         return createDeviceFactory(hostConfig, deviceDispatch, deviceSubscribe, store$)
     }]
