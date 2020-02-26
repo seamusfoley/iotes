@@ -1,6 +1,6 @@
 {
   "name": "iotes",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "A javascript library for intergrating iot services with modern front end state management tools",
   "main": "dist/index.js",
   "scripts": {
@@ -12,9 +12,9 @@
     "watch-ts": "tsc -w",
     "watch-node": "nodemon dist/run.js"
   },
-  "author": "seamusfoley",
+  "author": "seamusfoley ",
   "license": "MIT",
-  "peerDependencies": {
+  "dependencies": {
     "@types/react": "^16.9.19",
     "@wethecurious/phidget22-bundle": "^2.5.1",
     "mqtt": "^3.0.0",
