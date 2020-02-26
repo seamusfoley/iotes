@@ -1,4 +1,4 @@
-name: iotes
+name: iotes-npm-deploy
 
 on:
   push:

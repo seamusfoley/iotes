@@ -62,11 +62,11 @@ const createDeviceFactory = (
             }
         })
 
-        setTimeout(() => {
+        await setTimeout(() => {
             deviceDispatch(
                 createDeviceDispatchable(type, name, { value: Date.now() }),
             )
-        }, 100)
+        }, 10)
 
         return device
     }
@@ -88,11 +88,11 @@ const createDeviceFactory = (
 
         // Register listeners
 
-        setTimeout(() => {
+        await setTimeout(() => {
             deviceDispatch(
                 createDeviceDispatchable(type, name, { value: Date.now() }),
             )
-        }, 100)
+        }, 10)
 
         return device
     }
@@ -119,7 +119,7 @@ export const createLocalStoreAndStrategy = ():[Store, Strategy] => {
         const { name } = hostConfig
 
         // Test host dispatch
-        setTimeout(() => {
+        await setTimeout(() => {
             hostDispatch(createHostDispatchable('CONNECT', hostConfig.name))
         }, 10)
 

@@ -150,11 +150,11 @@ describe('Strategy implementation ', () => {
         let result: any = null
         localModule.hostSubscribe((state: any) => { result = state })
 
-        await new Promise((res) => setInterval(() => {
+        await new Promise((res) => setTimeout(() => {
             if (result) {
                 res()
             }
-        }, 10))
+        }, 20))
 
         expect(result[testTopologoy.hosts[0].name].type).toBe('CONNECT')
     })
@@ -163,11 +163,11 @@ describe('Strategy implementation ', () => {
         let result: any = null
         localModule.deviceSubscribe((state: any) => { result = state })
 
-        await new Promise((res) => setInterval(() => {
+        await new Promise((res) => setTimeout(() => {
             if (result) {
                 res()
             }
-        }, 10))
+        }, 20))
 
         expect(result[testTopologoy.devices[0].name].type).toBe('RFID_READER')
     })
@@ -179,11 +179,11 @@ describe('Strategy implementation ', () => {
         const signal = 'test'
         localStore.subscribe((state) => { result = state })
         localModule.deviceDispatch({ name: deviceName, payload: { signal } })
-        await new Promise((res) => setInterval(() => {
+        await new Promise((res) => setTimeout(() => {
             if (result) {
                 res()
             }
-        }, 100))
+        }, 20))
 
         expect(result[deviceName].payload).toStrictEqual({ signal })
     })
@@ -194,11 +194,11 @@ describe('Strategy implementation ', () => {
         const signal = 'test'
         localStore.subscribe((state) => { result = state })
         localModule.hostDispatch({ name: hostName, payload: { signal } })
-        await new Promise((res) => setInterval(() => {
+        await new Promise((res) => setTimeout(() => {
             if (result) {
                 res()
             }
-        }, 100))
+        }, 20))
 
         expect(result[hostName].payload).toStrictEqual({ signal })
     })
