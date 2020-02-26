@@ -1,6 +1,6 @@
 {
   "name": "phiget-react",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Creates an intergration between phidget devices and react making for much more reliable intergraiton of the stateful phidget api and stateless react components",
   "main": "dist/index.js",
   "scripts": {
