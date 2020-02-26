@@ -22,18 +22,18 @@ export const createStore = (
         subscribers.forEach((subscriber) => subscriber(state))
     }
 
-    const isObjectLiteral = (predicate:{[key: string]: any}) => {
-        if (Object.getPrototypeOf(predicate) !== Object.getPrototypeOf({})) return false
+    const isObjectLiteral = (testCase:{[key: string]: any}) => {
+        if (Object.getPrototypeOf(testCase) !== Object.getPrototypeOf({})) return false
 
         let keys = []
         try {
-            keys = Object.keys(predicate)
+            keys = Object.keys(testCase)
             if (keys.length === 0) return false
         } catch {
             return false
         }
 
-        return keys.reduce((a: boolean, v: string | number) => (predicate[v] ? a : false), true)
+        return keys.reduce((a: boolean, v: string | number) => (testCase[v] ? a : false), true)
     }
 
     const unwrapDispatchable = (dispatchable: Dispatchable): [State, ShouldUpdateState] => {

@@ -13,19 +13,24 @@ import { EnvironmentObject } from '../../environment'
 import { createStore } from '../../store'
 
 
-const createHostDispatchable = (name: string, type: HostConnectionType): HostDispatchable => ({
+const createHostDispatchable = (
+    type: HostConnectionType,
+    name: string,
+    payload: { [key:string] :any } = {},
+): HostDispatchable => ({
     [name]: {
         type,
+        name,
         meta: { timestamp: Date.now().toString(), channel: 'local', host: name },
-        payload: {},
+        payload,
     },
 })
 
 const createDeviceFactory = (
     hostConfig: HostConfig,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
-    hostDispatch: (dispatchable: DeviceDispatchable) => void,
-    subscribe: Store['subscribe'],
+    deviceSubscribe: any,
+    store: Store,
 ): DeviceFactory => {
     const createDeviceDispatchable = (
         type: string,
@@ -40,18 +45,22 @@ const createDeviceFactory = (
         },
     })
 
-    setTimeout(() => {
-        hostDispatch(createHostDispatchable(hostConfig.name, 'CONNECT'))
-    }, 10)
-
-
     // RFID READER
     const createRfidReader = async (
         device: DeviceConfig,
     ) => {
         const { name, type } = device
 
-        let prevValue:any
+        deviceSubscribe((state: any) => {
+            // console.log(`device subscibe ${JSON.stringify(state, null, 2)}`)
+            if (state.name === name && state['@@source'] === 'APP') {
+                store.dispatch(createDeviceDispatchable(
+                    type,
+                    name,
+                    { signal: state.payload.signal },
+                ))
+            }
+        })
 
         setTimeout(() => {
             deviceDispatch(
@@ -67,6 +76,15 @@ const createDeviceFactory = (
         device: DeviceConfig,
     ) => {
         const { type, name } = device
+
+        // resigster trasmitter
+
+        deviceSubscribe((state: any) => {
+            if (state.name === name && state['@@source'] === 'APP') {
+                console.log(`Transmit Thing ${name}`)
+            }
+        })
+
 
         // Register listeners
 
@@ -91,6 +109,8 @@ export const createLocalStoreAndStrategy = ():[Store, Strategy] => {
     return [store$, (
         hostDispatch: (dispatchable: HostDispatchable) => void,
         deviceDispatch: (dispatchable: DeviceDispatchable) => void,
+        hostSubscribe: any,
+        deviceSubscribe: any,
     ): HostFactory => async (
         hostConfig: HostConfig,
     ): Promise<DeviceFactory> => {
@@ -98,6 +118,22 @@ export const createLocalStoreAndStrategy = ():[Store, Strategy] => {
 
         const { name } = hostConfig
 
-        return createDeviceFactory(hostConfig, deviceDispatch, hostDispatch, store$.subscribe)
+        // Test host dispatch
+        setTimeout(() => {
+            hostDispatch(createHostDispatchable('CONNECT', hostConfig.name))
+        }, 10)
+
+        hostSubscribe((state: any) => {
+            if (state.name === hostConfig.name && state['@@source'] === 'APP') {
+                store$.dispatch(createHostDispatchable(
+                    'CONNECT',
+                    hostConfig.name,
+                    { signal: 'test' },
+                ))
+            }
+        })
+
+
+        return createDeviceFactory(hostConfig, deviceDispatch, deviceSubscribe, store$)
     }]
 }
