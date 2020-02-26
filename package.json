@@ -12,8 +12,8 @@
     "watch-ts": "tsc -w",
     "watch-node": "nodemon dist/run.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "seamusfoley",
+  "license": "MIT",
   "peerDependencies": {
     "@types/react": "^16.9.19",
     "@wethecurious/phidget22-bundle": "^2.5.1",
