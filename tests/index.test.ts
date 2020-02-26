@@ -1,5 +1,5 @@
 import { TopologyMap, Store, DeviceDispatchable } from '../src/types'
-import { createPhidgetReact } from '../src'
+import { createIotes } from '../src'
 import { createLocalStoreAndStrategy } from '../src/strategies/local'
 import { createStore } from '../src/store'
 
@@ -127,7 +127,7 @@ let localModule: any
 describe('Strategy implementation ', () => {
     beforeEach(async () => {
         [localStore, createLocalStrategy] = createLocalStoreAndStrategy()
-        localModule = await createPhidgetReact(testTopologoy, createLocalStrategy)
+        localModule = await createIotes(testTopologoy, createLocalStrategy)
             .catch((err) => { throw Error(err) })
     })
 
@@ -137,7 +137,7 @@ describe('Strategy implementation ', () => {
 
     test('Can create intergration', () => {
         expect(async () => {
-            localModule = await createPhidgetReact(testTopologoy, createLocalStrategy)
+            localModule = await createIotes(testTopologoy, createLocalStrategy)
                 .catch((err) => { throw Error(err) })
         }).not.toThrowError()
         expect(localModule).toHaveProperty('hostSubscribe')

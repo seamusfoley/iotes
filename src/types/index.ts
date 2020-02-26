@@ -88,3 +88,15 @@ export type Strategy = (
     hostSubscribe: (subscriber: (state: State) => void) => void,
     deviceSubscribe: (subscriber: (state: State) => void) => void,
 ) => HostFactory
+
+
+// Iotes
+
+// This is the plugin return tyoe without plugins
+
+export type Iotes = {
+    hostDispatch: (dispatchable: HostDispatchable) => void,
+    deviceDispatch: (dispatchable: DeviceDispatchable) => void,
+    hostSubscribe: (subscriber: (state: State) => void) => void,
+    deviceSubscribe: (subscriber: (state: State) => void) => void,
+}
