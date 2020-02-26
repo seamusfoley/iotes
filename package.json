@@ -1,7 +1,7 @@
 {
-  "name": "iot-es",
-  "version": "0.0.1",
-  "description": "Creates an intergration between phidget devices and react making for much more reliable intergraiton of the stateful phidget api and stateless react components",
+  "name": "iotes",
+  "version": "0.1.0",
+  "description": "A javascript library for intergrating iot services with modern front end state management tools",
   "main": "dist/index.js",
   "scripts": {
     "start": "npm run watch",
@@ -14,7 +14,7 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "peerDependencies": {
     "@types/react": "^16.9.19",
     "@wethecurious/phidget22-bundle": "^2.5.1",
     "mqtt": "^3.0.0",
