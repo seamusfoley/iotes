@@ -1,0 +1,5 @@
+.github
+.vscode
+src
+tests
+__tests__

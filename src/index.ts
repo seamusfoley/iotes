@@ -10,12 +10,13 @@ import { createStore } from './store'
 import { EnvironmentObject } from './environment'
 import { createLogger } from './logger'
 import { createIntergration } from './intergration'
-import { indentityPlugin } from './plugins/indenity'
+import { identityPlugin } from './plugins/idenity'
 
-export const createIotes = async (
+
+const createIotes = async (
     topology: TopologyMap,
     strategy: Strategy,
-    plugin: (iotes: Iotes) => any = indentityPlugin,
+    plugin: (iotes: Iotes) => any = identityPlugin,
     logLevel?: LogLevel,
     logger?: Logger,
 ): Promise<Iotes> => {
@@ -52,4 +53,14 @@ export const createIotes = async (
         hostDispatch: (dispatchable: Dispatchable) => { host$.dispatch({ ...dispatchable, '@@source': 'APP', '@@bus': 'SYSTEM' }) },
         deviceDispatch: (dispatchable: Dispatchable) => { device$.dispatch({ ...dispatchable, '@@source': 'APP', '@@bus': 'DEVICE' }) },
     })
+}
+
+export {
+    createIotes,
+    Logger,
+    LogLevel,
+    TopologyMap,
+    Strategy,
+    Dispatchable,
+    Iotes,
 }

@@ -1,15 +1,16 @@
-# itoes
+# iotes
 
 **A javascript library for intergrating iot services with modern front end state management tools** 
 
 [![npm version](https://badge.fury.io/js/iotes.svg)](https://badge.fury.io/js/iotes)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/seamusfoley/iotes/master/LICENSE)
-![iotes-npm-deploy](https://github.com/seamusfoley/iotes/workflows/iotes-npm-deploy/badge.svg?branch=master)
+![Build](https://github.com/seamusfoley/iotes/workflows/iotes-npm-deploy/badge.svg?branch=master)
 
 ## Table of Contents
-- [itoes](#itoes)
+- [iotes](#iotes)
   - [Table of Contents](#table-of-contents)
   - [Getting Started](#getting-started)
+  - [Work in progess](#work-in-progess)
     - [Introduction to iotes](#introduction-to-iotes)
     - [Installation](#installation)
     - [Using iotes](#using-iotes)
@@ -18,6 +19,7 @@
 
 Getting Started
 ----
+## Work in progess
 
 ### Introduction to iotes
 

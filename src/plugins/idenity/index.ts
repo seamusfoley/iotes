@@ -2,4 +2,4 @@
 
 import { Iotes } from '../../types'
 
-export const indentityPlugin = (iotes: Iotes): Iotes => iotes
+export const identityPlugin = (iotes: Iotes): Iotes => iotes
