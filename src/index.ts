@@ -13,13 +13,13 @@ import { createIntergration } from './intergration'
 import { identityPlugin } from './plugins/idenity'
 
 
-const createIotes = async (
+const createIotes = (
     topology: TopologyMap,
     strategy: Strategy,
     plugin: (iotes: Iotes) => any = identityPlugin,
     logLevel?: LogLevel,
     logger?: Logger,
-): Promise<Iotes> => {
+): Iotes => {
     // Set up logger
     EnvironmentObject.logger = createLogger(logger, logLevel)
 
@@ -35,7 +35,7 @@ const createIotes = async (
     const { host$, device$ } = EnvironmentObject.stores
 
     try {
-        await createIntergration(strategy(
+        createIntergration(strategy(
             host$.dispatch,
             device$.dispatch,
             host$.subscribe,

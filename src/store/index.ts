@@ -1,9 +1,9 @@
 import { Store, Dispatchable, State } from '../types'
 import { EnvironmentObject } from '../environment'
 
-interface WrappedStore extends Store {
-    isWrapped: boolean
-}
+type Subscription = (state: State) => any
+type Selector = string[]
+type Subscriber = [Subscription, Selector | undefined]
 
 export const createStore = (
     errorHandler?: (error: Error, currentState?: State) => State,
@@ -12,14 +12,32 @@ export const createStore = (
     type ShouldUpdateState = boolean
 
     let state: State = {}
-    let subscribers: ((state: State) => unknown)[] = []
+    let subscribers: Subscriber[] = []
 
-    const subscribe = (subscriber: (state: State) => void) => {
+    const subscribe = (subscription: Subscription, selector?: Selector) => {
+        const subscriber: Subscriber = [subscription, selector]
         subscribers = [subscriber, ...subscribers]
     }
 
+    const applySelectors = (selectors: string[]) => (
+        selectors.reduce((
+            a: { [key: string]: any },
+            selector: string,
+        ) => (
+            state[selector]
+                ? { ...a, ...state[selector] }
+                : a
+        ),
+        {})
+    )
+
     const updateSubscribers = () => {
-        subscribers.forEach((subscriber) => subscriber(state))
+        subscribers.forEach((subscriber: Subscriber) => {
+            const [subscription, selectors] = subscriber
+            const stateSelection = selectors ? applySelectors(selectors) : state
+            logger.log(`Subscriber receive state ${state}`)
+            if (Object.keys(stateSelection).length !== 0) subscription(stateSelection)
+        })
     }
 
     const isObjectLiteral = (testCase:{[key: string]: any}) => {
@@ -63,7 +81,7 @@ const nullStore = {
     subscribe: (_: (state: State) => void) => {},
 }
 
-export const unwrapStore = (store: WrappedStore | undefined): Store => {
+export const unwrapStore = (store: Store | undefined): Store => {
     if (!store) {
         EnvironmentObject.logger.warn('Attempted to access undefined store, returning non functional null store in it\'s place')
         return nullStore

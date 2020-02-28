@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "start": "npm run watch",
-    "build": "tsc",
+    "build": "npm run lint && npm run test && tsc && echo Build Succeeded",
     "lint": "eslint ./src/**/*.ts",
     "test": "jest ./test",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold\" \"npm run watch-ts\" \"npm run watch-node\"",
