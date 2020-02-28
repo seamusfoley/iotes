@@ -75,17 +75,3 @@ export const createStore = (
         subscribe,
     }
 }
-
-const nullStore = {
-    dispatch: (_: Dispatchable) => {},
-    subscribe: (_: (state: State) => void) => {},
-}
-
-export const unwrapStore = (store: Store | undefined): Store => {
-    if (!store) {
-        EnvironmentObject.logger.warn('Attempted to access undefined store, returning non functional null store in it\'s place')
-        return nullStore
-    }
-
-    return store
-}
