@@ -1,25 +1,22 @@
-import {
-    Logger,
-    LogLevel,
-    TopologyMap,
-    Strategy,
-    Dispatchable,
-    Iotes,
-} from './types'
 import { createStore } from './store'
 import { EnvironmentObject } from './environment'
 import { createLogger } from './logger'
-import { createIntergration } from './intergration'
-import { identityPlugin } from './plugins/idenity'
+import { createIntegration } from './Integration'
+import { identityPlugin } from './plugins/identity'
 
+import {
+    Dispatchable,
+    Iotes,
+    CreateIotes,
+} from './types'
 
-const createIotes = (
-    topology: TopologyMap,
-    strategy: Strategy,
-    plugin: (iotes: Iotes) => any = identityPlugin,
-    logLevel?: LogLevel,
-    logger?: Logger,
-): Iotes => {
+const createIotes: CreateIotes = ({
+    topology,
+    strategy,
+    plugin = identityPlugin,
+    logLevel,
+    logger,
+}): Iotes => {
     // Set up logger
     EnvironmentObject.logger = createLogger(logger, logLevel)
 
@@ -35,7 +32,7 @@ const createIotes = (
     const { host$, device$ } = EnvironmentObject.stores
 
     try {
-        createIntergration(strategy(
+        createIntegration(strategy(
             host$.dispatch,
             device$.dispatch,
             host$.subscribe,
@@ -43,7 +40,7 @@ const createIotes = (
         ), topology)
     } catch (error) {
         if (error && error.length > 0) { throw Error(error) }
-        throw Error('Failed to create intergration for unknown reasons. Did you pass the result of a function call instead of a function?')
+        throw Error('Failed to create Integration for unknown reasons. Did you pass the result of a function call instead of a function?')
     }
 
     return plugin({
@@ -57,10 +54,4 @@ const createIotes = (
 
 export {
     createIotes,
-    Logger,
-    LogLevel,
-    TopologyMap,
-    Strategy,
-    Dispatchable,
-    Iotes,
 }

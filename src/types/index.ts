@@ -8,7 +8,7 @@ export type HostConfig = {
     password?: string
 }
 
-export type HostConnectionType = 'CONNECT' | 'DISCONNECT' | 'RECONNECTING'
+export type HostConnectionType = 'CONNECT' | 'DISCONNECT' | 'RECONNECTING' | 'DEVICE_CONNECT' | 'DEVICE_DISCONNECT'
 
 export type HostFactory = (hostConfig: HostConfig) => Promise<DeviceFactory>
 
@@ -28,8 +28,8 @@ export type DeviceFactory = {
     [key in 'RFID_READER' | 'ROTARY_ENCODER']: (device: DeviceConfig) => Promise<{type: DeviceType, name: string, channel: number}>
 }
 
-// Intergration
-export type Intergration = (
+// Integration
+export type Integration = (
     hostFactory: HostFactory,
     topologyMap: TopologyMap
 ) => void
@@ -49,14 +49,14 @@ export interface Logger {
     error: (error: string) => any
 }
 
-export type LogLevel = 'SILENT' | 'INFO' | 'LOG' | 'WARN' | 'DEBUG'
+export type LogLevel = 'SILENT' | 'INFO' | 'LOG' | 'WARN' | 'DEBUG' | 'ERROR'
 
 // Dispatchables
 export type State = { [key: string]: any }
 
 export type Dispatchable = State | Error
 
-type ErrorDispatchable = {
+export type ErrorDispatchable = {
     isError?: boolean,
     error?: { message: string, code?: string, level: LogLevel }
 }
@@ -74,9 +74,15 @@ export type HostDispatchable = {[deviceName: string] : {
     payload: {[key: string]: any}
 } & ErrorDispatchable }
 
+export type Subscription = (state: State) => any
+
+export type Selector = string[]
+
+export type Subscriber = [Subscription, Selector | undefined]
+
 export interface Store {
     dispatch: (dispatchable: Dispatchable) => void
-    subscribe: (subscriber: (state: State) => void) => void
+    subscribe: (subscription: Subscription, selector?: Selector) => void
 }
 
 // Strategy
@@ -92,11 +98,23 @@ export type Strategy = (
 
 // Iotes
 
-// This is the plugin return tyoe without plugins
+// This is the return type without plugins
 
 export type Iotes = {
     hostDispatch: (dispatchable: HostDispatchable) => void,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
-    hostSubscribe: (subscriber: (state: State) => void) => void,
-    deviceSubscribe: (subscriber: (state: State) => void) => void,
+    hostSubscribe: (subscription: Subscription, selector?: Selector) => void,
+    deviceSubscribe: (subscription: Subscription, selector?: Selector) => void,
 }
+
+export type CreateIotes = (conifg: {
+    topology: TopologyMap,
+    strategy: Strategy,
+    plugin?: (iotes: Iotes) => any,
+    logLevel?: LogLevel,
+    logger?: Logger,
+}) => Iotes
+
+declare const createIotes: CreateIotes
+
+export { createIotes }

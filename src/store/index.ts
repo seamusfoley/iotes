@@ -1,9 +1,12 @@
-import { Store, Dispatchable, State } from '../types'
+import {
+    Store,
+    Dispatchable,
+    State,
+    Selector,
+    Subscriber,
+    Subscription,
+} from '../types'
 import { EnvironmentObject } from '../environment'
-
-type Subscription = (state: State) => any
-type Selector = string[]
-type Subscriber = [Subscription, Selector | undefined]
 
 export const createStore = (
     errorHandler?: (error: Error, currentState?: State) => State,

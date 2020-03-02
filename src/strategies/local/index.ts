@@ -119,12 +119,15 @@ export const createLocalStoreAndStrategy = ():[Store, Strategy] => {
         const { name } = hostConfig
 
         // Test host dispatch
-        await setTimeout(() => {
-            hostDispatch(createHostDispatchable('CONNECT', hostConfig.name))
-        }, 10)
+        await new Promise((res) => {
+            setTimeout(() => {
+                hostDispatch(createHostDispatchable('CONNECT', hostConfig.name))
+                res()
+            }, 10)
+        })
 
         hostSubscribe((state: any) => {
-            if (state.name === hostConfig.name && state['@@source'] === 'APP') {
+            if (state.name === name && state['@@source'] === 'APP') {
                 store$.dispatch(createHostDispatchable(
                     'CONNECT',
                     hostConfig.name,

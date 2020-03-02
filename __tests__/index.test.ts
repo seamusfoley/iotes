@@ -120,23 +120,30 @@ describe('Store module ', () => {
     })
 })
 
-/* Tests full strategy implementation. Uses local strategy as it intergration that uses timeouts to
+/* Tests full strategy implementation. Uses local strategy as it Integration that uses timeouts to
 simulate devices being connected and/or disconnected */
 
 let localModule: any
 describe('Strategy implementation ', () => {
     beforeEach(async () => {
         [localStore, createLocalStrategy] = createLocalStoreAndStrategy()
-        localModule = createIotes(testTopologoy, createLocalStrategy)
+        localModule = createIotes({
+            topology: testTopologoy,
+            strategy: createLocalStrategy,
+            logLevel: 'INFO',
+        })
     })
 
     afterEach(() => {
         localModule = null
     })
 
-    test('Can create intergration', () => {
-        expect(async () => {
-            localModule = createIotes(testTopologoy, createLocalStrategy)
+    test('Can create Integration', () => {
+        expect(() => {
+            localModule = createIotes({
+                topology: testTopologoy,
+                strategy: createLocalStrategy,
+            })
         }).not.toThrowError()
         expect(localModule).toHaveProperty('hostSubscribe')
         expect(localModule).toHaveProperty('deviceSubscribe')
@@ -144,7 +151,7 @@ describe('Strategy implementation ', () => {
         expect(localModule).toHaveProperty('deviceDispatch')
     })
 
-    test('Intergration host dispatches correctly', async () => {
+    test('Integration host dispatches correctly', async () => {
         let result: any = null
         localModule.hostSubscribe((state: any) => { result = state })
 
@@ -158,7 +165,7 @@ describe('Strategy implementation ', () => {
         expect(result[testTopologoy.hosts[0].name].type).toBe('CONNECT')
     })
 
-    test('Intergration decives dispatch correctly', async () => {
+    test('Integration decives dispatch correctly', async () => {
         let result: any = null
         localModule.deviceSubscribe((state: any) => { result = state })
 
@@ -173,7 +180,7 @@ describe('Strategy implementation ', () => {
     })
 
 
-    test('App dispatched to intergration decives correctly', async () => {
+    test('App dispatched to Integration decives correctly', async () => {
         let result: any = null
         const deviceName = 'READER/1'
         const signal = 'test'
@@ -189,7 +196,7 @@ describe('Strategy implementation ', () => {
         expect(result[deviceName].payload).toStrictEqual({ signal })
     })
 
-    test('App dispatched to intergration host correctly', async () => {
+    test('App dispatched to Integration host correctly', async () => {
         let result: any = null
         const hostName = 'testapp/0'
         const signal = 'test'
