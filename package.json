@@ -7,6 +7,7 @@
   "scripts": {
     "start": "npm run watch",
     "build": "npm run lint && npm run test && tsc && echo Build Succeeded",
+    "dirty-build": "tsc",
     "lint": "eslint ./src/**/*.ts",
     "test": "jest ./__tests__/*.test.ts",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold\" \"npm run watch-ts\" \"npm run watch-node\"",

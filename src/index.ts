@@ -1,7 +1,7 @@
 import { createStore } from './store'
 import { EnvironmentObject } from './environment'
 import { createLogger } from './logger'
-import { createIntegration } from './Integration'
+import { createIntegration } from './integration'
 import { identityPlugin } from './plugins/identity'
 
 import {
@@ -47,8 +47,14 @@ const createIotes: CreateIotes = ({
         hostSubscribe: host$.subscribe,
         deviceSubscribe: device$.subscribe,
         // wrap dispatch with source value
-        hostDispatch: (dispatchable: Dispatchable) => { host$.dispatch({ ...dispatchable, '@@source': 'APP', '@@bus': 'SYSTEM' }) },
-        deviceDispatch: (dispatchable: Dispatchable) => { device$.dispatch({ ...dispatchable, '@@source': 'APP', '@@bus': 'DEVICE' }) },
+        hostDispatch: (dispatchable: Dispatchable) => {
+            const hostDispatchable = { [dispatchable.name]: { ...dispatchable, '@@source': 'APP', '@@bus': 'HOST' } }
+            host$.dispatch(hostDispatchable)
+        },
+        deviceDispatch: (dispatchable: Dispatchable) => {
+            const deviceDispatchable = { [dispatchable.name]: { ...dispatchable, '@@source': 'APP', '@@bus': 'DEVICE' } }
+            device$.dispatch(deviceDispatchable)
+        },
     })
 }
 

@@ -19,7 +19,7 @@ export const createStore = (
 
     const subscribe = (subscription: Subscription, selector?: Selector) => {
         const subscriber: Subscriber = [subscription, selector]
-        subscribers = [subscriber, ...subscribers]
+        subscribers = [...subscribers, subscriber]
     }
 
     const applySelectors = (selectors: string[]) => (
@@ -40,6 +40,8 @@ export const createStore = (
             const stateSelection = selectors ? applySelectors(selectors) : state
             logger.log(`Subscriber receive state: ${JSON.stringify(state, null, 2)}`)
             if (Object.keys(stateSelection).length !== 0) subscription(stateSelection)
+
+            subscription(state)
         })
     }
 

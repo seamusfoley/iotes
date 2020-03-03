@@ -9,17 +9,21 @@
 ## Table of Contents
 - [iotes](#iotes)
   - [Table of Contents](#table-of-contents)
-  - [Getting Started](#getting-started)
   - [Work in progess](#work-in-progess)
+  - [Getting Started](#getting-started)
     - [Introduction to iotes](#introduction-to-iotes)
+    - [General Design](#general-design)
     - [Installation](#installation)
     - [Using iotes](#using-iotes)
 - [Contribution](#contribution)
   - [MIT License](#mit-license)
 
-Getting Started
-----
 ## Work in progess
+
+Note that this is very much a work in progress at this stage and not suitable for general use
+
+## Getting Started
+
 
 ### Introduction to iotes
 
@@ -33,9 +37,32 @@ In order to receive updates fromt the iot host (such as an mqtt broker), a host 
 
 The iotes library provides an abstraction to create the host stream and the device stream for different connection strategies, and plugins for extra compatibility with different front end frameworks.
 
+### General Design
+
+iotes is deigned to a be a generic middleware to sit between a state management library (via a plugin) and iot api (via a strategy). It can operate without a plugin but must have a strategy in order to function.
+
+Iotes works on an observable pattern, On initialization iotes creates two stores which handle `subscribers` (functions which are notified of store changes) and `dispatchers` (functions which update the store).
+
+The two stores are the 
+
+ - host store : for system events like connections, disconnections etc
+ - device store: which is reserved one for data from the the iot devices. 
+
+```
+
+                ----------                      -----------                      -------------   
+                |        |   -- dispatch -->    |         |   -- subscribe -->   |           |
+    State <---> | Plugin |                      |  iotes  |                      | Strategy  |  <---> Network
+                |        |   <-- subscribe --   |         |   <-- dispatch --    |           |
+                ----------                      -----------                      -------------
+
+```
+
 ### Installation
 
 iotes is available as an [npm package](https://npmjs.org/package/iotes).
+
+itoes strategies and plugins are avaliable as serperate npm packages, their names being with iotes-*
 
 Install iotes locally via npm:
 
@@ -80,6 +107,12 @@ iotes returns for functions for receiving and sending messages using the iotes h
     }
 ```
 
+The topology map is the main thing would need to supply. The topology map takes two arrays. An array of hosts and the devices
+
+What a host is depends on the strategy, in the case of mqtt for example the host refers to the mqtt broker. In the case of the a phdiget it is a hub.
+
+The devices are connected to the host by the hostName field in the device config. They will be connected to the correct host on iotes initialization.
+
 ```js
 import { createIotes } from 'iotes'
 import { createMqttStrategy } from 'iotes-mqtt-strategy'
@@ -94,7 +127,6 @@ const topologyMap= {
     devices: [
         hostName: 'mqttExample',
         name 'deviceExample',
-
     ]
 }
 
@@ -104,7 +136,6 @@ const {
     deviceSubscribe,
     deviceDisptach   
 } = createItoes(topologyMap, createMqttStrategy)
-
 
 hostSubscribe((state) => console.log(state))
 ```
@@ -144,6 +175,7 @@ const {
 hostSubscribe((state: State) => console.log(state))
 
 ```
+
 
 </p>
 </details>
