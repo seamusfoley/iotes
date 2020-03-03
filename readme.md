@@ -10,6 +10,7 @@
 - [iotes](#iotes)
   - [Table of Contents](#table-of-contents)
   - [Work in progess](#work-in-progess)
+  - [We the Curious](#we-the-curious)
   - [Getting Started](#getting-started)
     - [Introduction to iotes](#introduction-to-iotes)
     - [General Design](#general-design)
@@ -21,6 +22,10 @@
 ## Work in progess
 
 Note that this is very much a work in progress at this stage and not suitable for general use
+
+## We the Curious
+
+This is designed to be developed to replace the ifs-brightsignmiddleware-redux
 
 ## Getting Started
 
