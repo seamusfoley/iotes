@@ -104,7 +104,7 @@ const createDeviceFactory = <StrategyConfig>(
     }
 }
 
-export const createLocalStoreAndStrategy = (): [Store, Strategy<any>] => {
+export const createLocalStoreAndStrategy = (): [Store, Strategy<undefined>] => {
     const store$ = createStore()
 
     return [
