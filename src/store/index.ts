@@ -35,10 +35,10 @@ export const createStore = (
     )
 
     const updateSubscribers = () => {
+        logger.log(`Subscriber to receive state: ${JSON.stringify(state, null, 2)}`)
         subscribers.forEach((subscriber: Subscriber) => {
-            const [subscription, selectors] = subscriber
-            const stateSelection = selectors ? applySelectors(selectors) : state
-            logger.log(`Subscriber receive state: ${JSON.stringify(state, null, 2)}`)
+            const [subscription, selector] = subscriber
+            const stateSelection = selector ? applySelectors(selector) : state
             if (Object.keys(stateSelection).length !== 0) subscription(stateSelection)
 
             subscription(state)

@@ -7,15 +7,15 @@ import {
 } from '../types'
 import { EnvironmentObject } from '../environment'
 
-export const createIntegration: Integration = (
-    hostFactory: HostFactory,
-    topologyMap: TopologyMap,
+export const createIntegration: Integration = <StrategyConfig>(
+    hostFactory: HostFactory<StrategyConfig>,
+    topologyMap: TopologyMap<StrategyConfig>,
 ): void => {
     const { logger } = EnvironmentObject
     const { hosts, devices } = topologyMap
 
     Promise.all(
-        hosts.map(async (hostConfig: HostConfig) => {
+        hosts.map(async (hostConfig: HostConfig<StrategyConfig>) => {
             logger.info(`Creating host ${hostConfig.name}`)
             const deviceFactory = await hostFactory(hostConfig).catch(() => {
                 throw Error(`Failed to create Factory ${hostConfig.name})`)

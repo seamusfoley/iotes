@@ -12,22 +12,25 @@ import {
 import { EnvironmentObject } from '../../environment'
 import { createStore } from '../../store'
 
-
 const createHostDispatchable = (
     type: HostConnectionType,
     name: string,
-    payload: { [key:string] :any } = {},
+    payload: { [key: string]: any } = {},
 ): HostDispatchable => ({
     [name]: {
         type,
         name,
-        meta: { timestamp: Date.now().toString(), channel: 'local', host: name },
+        meta: {
+            timestamp: Date.now().toString(),
+            channel: 'local',
+            host: name,
+        },
         payload,
     },
 })
 
-const createDeviceFactory = (
-    hostConfig: HostConfig,
+const createDeviceFactory = <StrategyConfig>(
+    hostConfig: HostConfig<StrategyConfig>,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
     deviceSubscribe: any,
     store: Store,
@@ -35,30 +38,32 @@ const createDeviceFactory = (
     const createDeviceDispatchable = (
         type: string,
         deviceName: string,
-        payload: {[key: string] : any},
-    ):DeviceDispatchable => ({
+        payload: { [key: string]: any },
+    ): DeviceDispatchable => ({
         [deviceName]: {
             type,
             name: deviceName,
-            meta: { timestamp: Date.now().toString(), channel: 'local', host: hostConfig.name },
+            meta: {
+                timestamp: Date.now().toString(),
+                channel: 'local',
+                host: hostConfig.name,
+            },
             payload,
         },
     })
 
     // RFID READER
-    const createRfidReader = async (
-        device: DeviceConfig,
-    ) => {
+    const createRfidReader = async (device: DeviceConfig) => {
         const { name, type } = device
 
         deviceSubscribe((state: any) => {
             // console.log(`device subscibe ${JSON.stringify(state, null, 2)}`)
             if (state.name === name && state['@@source'] === 'APP') {
-                store.dispatch(createDeviceDispatchable(
-                    type,
-                    name,
-                    { signal: state.payload.signal },
-                ))
+                store.dispatch(
+                    createDeviceDispatchable(type, name, {
+                        signal: state.payload.signal,
+                    }),
+                )
             }
         })
 
@@ -72,9 +77,7 @@ const createDeviceFactory = (
     }
 
     // ROTARY ENCODER
-    const createRotaryEncoder = async (
-        device: DeviceConfig,
-    ) => {
+    const createRotaryEncoder = async (device: DeviceConfig) => {
         const { type, name } = device
 
         // resigster trasmitter
@@ -85,9 +88,7 @@ const createDeviceFactory = (
             }
         })
 
-
         // Register listeners
-
         await setTimeout(() => {
             deviceDispatch(
                 createDeviceDispatchable(type, name, { value: Date.now() }),
@@ -103,39 +104,49 @@ const createDeviceFactory = (
     }
 }
 
-export const createLocalStoreAndStrategy = ():[Store, Strategy] => {
+export const createLocalStoreAndStrategy = (): [Store, Strategy<any>] => {
     const store$ = createStore()
 
-    return [store$, (
-        hostDispatch: (dispatchable: HostDispatchable) => void,
-        deviceDispatch: (dispatchable: DeviceDispatchable) => void,
-        hostSubscribe: any,
-        deviceSubscribe: any,
-    ): HostFactory => async (
-        hostConfig: HostConfig,
-    ): Promise<DeviceFactory> => {
-        const { logger } = EnvironmentObject
+    return [
+        store$,
+        <StrategyConfig>(
+            hostDispatch: (dispatchable: HostDispatchable) => void,
+            deviceDispatch: (dispatchable: DeviceDispatchable) => void,
+            hostSubscribe: any,
+            deviceSubscribe: any,
+        ): HostFactory<StrategyConfig> => async (
+            hostConfig: HostConfig<StrategyConfig>,
+        ): Promise<DeviceFactory> => {
+            const { logger } = EnvironmentObject
 
-        const { name } = hostConfig
+            const { name } = hostConfig
 
-        hostSubscribe((state: any) => {
-            if (state.name === name && state['@@source'] === 'APP') {
-                store$.dispatch(createHostDispatchable(
-                    'CONNECT',
-                    hostConfig.name,
-                    { signal: 'test' },
-                ))
-            }
-        })
+            hostSubscribe((state: any) => {
+                if (state.name === name && state['@@source'] === 'APP') {
+                    store$.dispatch(
+                        createHostDispatchable('CONNECT', hostConfig.name, {
+                            signal: 'test',
+                        }),
+                    )
+                }
+            })
 
-        // Test host dispatch
-        await new Promise((res) => {
-            setTimeout(() => {
-                hostDispatch(createHostDispatchable('CONNECT', hostConfig.name))
-                res()
-            }, 10)
-        })
+            // Test host dispatch
+            await new Promise((res) => {
+                setTimeout(() => {
+                    hostDispatch(
+                        createHostDispatchable('CONNECT', hostConfig.name),
+                    )
+                    res()
+                }, 10)
+            })
 
-        return createDeviceFactory(hostConfig, deviceDispatch, deviceSubscribe, store$)
-    }]
+            return createDeviceFactory(
+                hostConfig,
+                deviceDispatch,
+                deviceSubscribe,
+                store$,
+            )
+        },
+    ]
 }

@@ -1,16 +1,18 @@
 // Hosts
-export type HostMap = HostConfig[]
+export type HostMap<StrategyConfig> = HostConfig<StrategyConfig | undefined>[]
 
-export type HostConfig = {
+export type HostConfig<StrategyConfig> = {
     name: string
     host: string
     port: string
-    password?: string
+    strategyConfig?: StrategyConfig
 }
 
 export type HostConnectionType = 'CONNECT' | 'DISCONNECT' | 'RECONNECTING' | 'DEVICE_CONNECT' | 'DEVICE_DISCONNECT'
 
-export type HostFactory = (hostConfig: HostConfig) => Promise<DeviceFactory>
+export type HostFactory<StrategyConfig> = (
+    hostConfig: HostConfig<StrategyConfig>
+) => Promise<DeviceFactory>
 
 // Devices
 export type DeviceType = 'RFID_READER' | 'ROTARY_ENCODER'
@@ -29,9 +31,9 @@ export type DeviceFactory = {
 }
 
 // Integration
-export type Integration = (
-    hostFactory: HostFactory,
-    topologyMap: TopologyMap
+export type Integration = <StrategyConfig>(
+    hostFactory: HostFactory<StrategyConfig>,
+    topologyMap: TopologyMap<StrategyConfig>
 ) => void
 
 export type PhidgetReactConfig = {
@@ -86,14 +88,17 @@ export interface Store {
 }
 
 // Strategy
-export type TopologyMap = { hosts: HostConfig[], devices: DeviceConfig[] }
+export type TopologyMap<StrategyConfig> = {
+    hosts: HostMap<StrategyConfig>,
+    devices: DeviceConfig[],
+}
 
-export type Strategy = (
+export type Strategy<StrategyConfig> = (
     hostDispatch: (dispatchable: HostDispatchable) => void,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
     hostSubscribe: (subscriber: (state: State) => void) => void,
     deviceSubscribe: (subscriber: (state: State) => void) => void,
-) => HostFactory
+) => HostFactory<StrategyConfig>
 
 
 // Iotes
@@ -107,9 +112,9 @@ export type Iotes = {
     deviceSubscribe: (subscription: Subscription, selector?: Selector) => void,
 }
 
-export type CreateIotes = (conifg: {
-    topology: TopologyMap,
-    strategy: Strategy,
+export type CreateIotes = <StrategyConfig>(config: {
+    topology: TopologyMap<StrategyConfig>,
+    strategy: Strategy<StrategyConfig>,
     plugin?: (iotes: Iotes) => any,
     logLevel?: LogLevel,
     logger?: Logger,
