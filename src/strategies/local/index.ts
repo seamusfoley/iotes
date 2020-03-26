@@ -12,6 +12,8 @@ import {
 import { EnvironmentObject } from '../../environment'
 import { createStore } from '../../store'
 
+type DeviceTypes = 'RFID_READER' | 'ROTARY_ENCODER'
+
 const createHostDispatchable = (
     type: HostConnectionType,
     name: string,
@@ -29,12 +31,12 @@ const createHostDispatchable = (
     },
 })
 
-const createDeviceFactory = <StrategyConfig>(
+const createDeviceFactory = async <StrategyConfig> (
     hostConfig: HostConfig<StrategyConfig>,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
     deviceSubscribe: any,
     store: Store,
-): DeviceFactory => {
+): Promise<DeviceFactory<DeviceTypes>> => {
     const createDeviceDispatchable = (
         type: string,
         deviceName: string,
@@ -53,7 +55,7 @@ const createDeviceFactory = <StrategyConfig>(
     })
 
     // RFID READER
-    const createRfidReader = async (device: DeviceConfig) => {
+    const createRfidReader = async (device: DeviceConfig<'RFID_READER'>) => {
         const { name, type } = device
 
         deviceSubscribe((state: any) => {
@@ -77,7 +79,7 @@ const createDeviceFactory = <StrategyConfig>(
     }
 
     // ROTARY ENCODER
-    const createRotaryEncoder = async (device: DeviceConfig) => {
+    const createRotaryEncoder = async (device: DeviceConfig<'ROTARY_ENCODER'>) => {
         const { type, name } = device
 
         // resigster trasmitter
@@ -99,12 +101,12 @@ const createDeviceFactory = <StrategyConfig>(
     }
 
     return {
-        ROTARY_ENCODER: createRotaryEncoder,
         RFID_READER: createRfidReader,
+        ROTARY_ENCODER: createRotaryEncoder,
     }
 }
 
-export const createLocalStoreAndStrategy = (): [Store, Strategy<undefined>] => {
+export const createLocalStoreAndStrategy = (): [Store, Strategy<undefined, DeviceTypes>] => {
     const store$ = createStore()
 
     return [
@@ -114,9 +116,9 @@ export const createLocalStoreAndStrategy = (): [Store, Strategy<undefined>] => {
             deviceDispatch: (dispatchable: DeviceDispatchable) => void,
             hostSubscribe: any,
             deviceSubscribe: any,
-        ): HostFactory<StrategyConfig> => async (
+        ): HostFactory<StrategyConfig, DeviceTypes> => async (
             hostConfig: HostConfig<StrategyConfig>,
-        ): Promise<DeviceFactory> => {
+        ): Promise<DeviceFactory<DeviceTypes>> => {
             const { logger } = EnvironmentObject
 
             const { name } = hostConfig

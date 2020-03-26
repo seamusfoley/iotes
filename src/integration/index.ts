@@ -7,9 +7,9 @@ import {
 } from '../types'
 import { EnvironmentObject } from '../environment'
 
-export const createIntegration: Integration = <StrategyConfig>(
-    hostFactory: HostFactory<StrategyConfig>,
-    topologyMap: TopologyMap<StrategyConfig>,
+export const createIntegration: Integration = <StrategyConfig, DeviceTypes extends string>(
+    hostFactory: HostFactory<StrategyConfig, DeviceTypes>,
+    topologyMap: TopologyMap<StrategyConfig, DeviceTypes>,
 ): void => {
     const { logger } = EnvironmentObject
     const { hosts, devices } = topologyMap

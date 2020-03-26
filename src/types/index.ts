@@ -10,30 +10,35 @@ export type HostConfig<StrategyConfig> = {
 
 export type HostConnectionType = 'CONNECT' | 'DISCONNECT' | 'RECONNECTING' | 'DEVICE_CONNECT' | 'DEVICE_DISCONNECT'
 
-export type HostFactory<StrategyConfig> = (
+export type HostFactory<StrategyConfig, DeviceTypes extends string> = (
     hostConfig: HostConfig<StrategyConfig>
-) => Promise<DeviceFactory>
+) => Promise<DeviceFactory<DeviceTypes>>
 
 // Devices
-export type DeviceType = 'RFID_READER' | 'ROTARY_ENCODER'
 
-export type DeviceMap = DeviceConfig[]
+export type DeviceMap<DeviceTypes> = DeviceConfig<DeviceTypes> []
 
-export type DeviceConfig = {
-    type: DeviceType
+export type DeviceConfig<DeviceTypes> = {
+    type: DeviceTypes
     name: string,
     channel: number,
     hostName: string
 }
 
-export type DeviceFactory = {
-    [key in 'RFID_READER' | 'ROTARY_ENCODER']: (device: DeviceConfig) => Promise<{type: DeviceType, name: string, channel: number}>
+export type DeviceFactory<DeviceTypes extends string> = {
+    [ key in DeviceTypes ]: (
+        device: DeviceConfig<DeviceTypes>
+    ) => Promise<{
+        type: DeviceTypes,
+        name: string,
+        channel: number
+    }>
 }
 
 // Integration
-export type Integration = <StrategyConfig>(
-    hostFactory: HostFactory<StrategyConfig>,
-    topologyMap: TopologyMap<StrategyConfig>
+export type Integration = <StrategyConfig, DeviceTypes extends string>(
+    hostFactory: HostFactory<StrategyConfig, DeviceTypes>,
+    topologyMap: TopologyMap<StrategyConfig, DeviceTypes>
 ) => void
 
 export type PhidgetReactConfig = {
@@ -88,17 +93,17 @@ export interface Store {
 }
 
 // Strategy
-export type TopologyMap<StrategyConfig> = {
+export type TopologyMap<StrategyConfig, DeviceTypes extends string> = {
     hosts: HostMap<StrategyConfig>,
-    devices: DeviceConfig[],
+    devices: DeviceConfig<DeviceTypes>[],
 }
 
-export type Strategy<StrategyConfig> = (
+export type Strategy<StrategyConfig, DeviceTypes extends string> = (
     hostDispatch: (dispatchable: HostDispatchable) => void,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
     hostSubscribe: (subscriber: (state: State) => void) => void,
     deviceSubscribe: (subscriber: (state: State) => void) => void,
-) => HostFactory<StrategyConfig>
+) => HostFactory<StrategyConfig, DeviceTypes>
 
 
 // Iotes
@@ -112,9 +117,9 @@ export type Iotes = {
     deviceSubscribe: (subscription: Subscription, selector?: Selector) => void,
 }
 
-export type CreateIotes = <StrategyConfig>(config: {
-    topology: TopologyMap<StrategyConfig>,
-    strategy: Strategy<StrategyConfig>,
+export type CreateIotes = <StrategyConfig, DeviceTypes extends string>(config: {
+    topology: TopologyMap<StrategyConfig, DeviceTypes >,
+    strategy: Strategy<StrategyConfig, DeviceTypes>,
     plugin?: (iotes: Iotes) => any,
     logLevel?: LogLevel,
     logger?: Logger,
