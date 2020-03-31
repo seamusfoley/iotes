@@ -5,7 +5,9 @@ import { createStore } from '../src/store'
 
 // Test data
 
-const testTopologoy: TopologyMap = {
+type DeviceTypes = 'RFID_READER' | 'ROTARY_ENCODER'
+
+const testTopologoy: TopologyMap<{}, DeviceTypes> = {
     hosts: [{ name: 'testapp/0', host: 'localhost', port: '8888' }],
     devices: [
         {
