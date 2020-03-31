@@ -16,6 +16,6 @@ git commit -m "${VERSION}"
 git checkout master
 git merge develop
 git tag "${VERSION}"
-git push --tag
+git push
 git checkout develop
 git push
