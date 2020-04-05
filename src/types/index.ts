@@ -68,13 +68,14 @@ export type ErrorDispatchable = {
     error?: { message: string, code?: string, level: LogLevel }
 }
 
-export type DeviceDispatchable = {[deviceName: string] : {
+export type DeviceDispatchable = {[key: string] : {
+    name: string,
     type: string,
     meta: { timestamp: string, channel: string, host: string },
     payload: {[key: string]: any}
 } | Error }
 
-export type HostDispatchable = {[deviceName: string] : {
+export type HostDispatchable = { [key: string] : {
     type: HostConnectionType
     name: string
     meta: { timestamp: string, channel: string, host: string }

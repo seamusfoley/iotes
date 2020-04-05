@@ -1,4 +1,6 @@
-import { TopologyMap, Store, DeviceDispatchable } from '../src/types'
+import {
+    TopologyMap, Store, DeviceDispatchable, Iotes,
+} from '../src/types'
 import { createIotes } from '../src'
 import { createLocalStoreAndStrategy } from '../src/strategies/local'
 import { createStore } from '../src/store'
@@ -31,6 +33,7 @@ const createDeviceDispatchable = (
     payload: {[key: string] : any},
 ):DeviceDispatchable => ({
     [deviceName]: {
+        name: deviceName,
         type,
         meta: { timestamp: '1234', channel: 'local', host: 'local' },
         payload,
@@ -105,19 +108,20 @@ describe('Store module ', () => {
         localStore.dispatch(createDeviceDispatchable('RFID_READER', 'reader/2', { sample: 'test' }))
         localStore.dispatch(createDeviceDispatchable('RFID_READER', 'reader/1', { sample: 'newTest' }))
 
+
         expect(result).toStrictEqual({
-            /* eslint-disable */
             'reader/1': {
+                name: 'reader/1',
                 type: 'RFID_READER',
                 meta: { timestamp: '1234', channel: 'local', host: 'local' },
-                payload: { sample: 'newTest' }
+                payload: { sample: 'newTest' },
             },
             'reader/2': {
                 type: 'RFID_READER',
+                name: 'reader/2',
                 meta: { timestamp: '1234', channel: 'local', host: 'local' },
-                payload: { sample: 'test' }
-            }
-            /* eslint-enable */
+                payload: { sample: 'test' },
+            },
         })
     })
 })
@@ -125,7 +129,7 @@ describe('Store module ', () => {
 /* Tests full strategy implementation. Uses local strategy as it Integration that uses timeouts to
 simulate devices being connected and/or disconnected */
 
-let localModule: any
+let localModule: Iotes
 describe('Strategy implementation ', () => {
     beforeEach(async () => {
         [localStore, createLocalStrategy] = createLocalStoreAndStrategy()
@@ -182,20 +186,24 @@ describe('Strategy implementation ', () => {
 
     // TODO fix internal dispatch
 
-    /* test('App dispatched to integrated decives correctly', async () => {
-        let result: any = null
+    test('App dispatched to integrated decives correctly', async () => {
+        let result: any = {}
         const deviceName = 'READER/1'
-        const signal = 'test'
         localStore.subscribe((state) => { result = state })
-        localModule.deviceDispatch({ name: deviceName, payload: { signal } })
+
         await new Promise((res, rej) => setTimeout(() => {
             if (result) {
                 res()
             }
-            rej(Error('Result Empty'))
+            rej()
         }, 100))
 
-        expect(result[deviceName].payload).toStrictEqual({ signal })
+        localModule.deviceDispatch(createDeviceDispatchable('RFID_READER', deviceName, { signal: 'test' }))
+
+
+        // inline updates dont work corrctly. check store update method
+
+        expect(result[deviceName].payload).toStrictEqual({ signal: 'test' })
     })
 
     test('App dispatched to Integration host correctly', async () => {
@@ -203,7 +211,6 @@ describe('Strategy implementation ', () => {
         const hostName = 'testapp/0'
         const signal = 'test'
         localStore.subscribe((state) => { result = state })
-        localModule.hostDispatch({ name: hostName, payload: { signal } })
         await new Promise((res, rej) => setTimeout(() => {
             if (result) {
                 res()
@@ -212,5 +219,5 @@ describe('Strategy implementation ', () => {
         }, 500))
 
         expect(result[hostName].payload).toStrictEqual({ signal })
-    }) */
+    })
 })

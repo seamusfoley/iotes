@@ -59,13 +59,8 @@ const createDeviceFactory = async <StrategyConfig> (
         const { name, type } = device
 
         deviceSubscribe((state: any) => {
-            // console.log(`device subscibe ${JSON.stringify(state, null, 2)}`)
-            if (state.name === name && state['@@source'] === 'APP') {
-                store.dispatch(
-                    createDeviceDispatchable(type, name, {
-                        signal: state.payload.signal,
-                    }),
-                )
+            if (state[name] && state[name]['@@source'] === 'APP') {
+                store.dispatch({ [name]: state[name] })
             }
         })
 
@@ -83,10 +78,9 @@ const createDeviceFactory = async <StrategyConfig> (
         const { type, name } = device
 
         // resigster trasmitter
-
         deviceSubscribe((state: any) => {
-            if (state.name === name && state['@@source'] === 'APP') {
-                console.log(`Transmit Thing ${name}`)
+            if (state[name] && state[name]['@@source'] === 'APP') {
+                store.dispatch({ [name]: state[name] })
             }
         })
 
@@ -124,13 +118,11 @@ export const createLocalStoreAndStrategy = (): [Store, Strategy<undefined, Devic
             const { name } = hostConfig
 
             hostSubscribe((state: any) => {
-                if (state.name === name && state['@@source'] === 'APP') {
-                    store$.dispatch(
-                        createHostDispatchable('CONNECT', hostConfig.name, {
-                            signal: 'test',
-                        }),
-                    )
-                }
+                store$.dispatch(
+                    createHostDispatchable('CONNECT', hostConfig.name, {
+                        signal: 'test',
+                    }),
+                )
             })
 
             // Test host dispatch

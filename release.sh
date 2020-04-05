@@ -17,5 +17,6 @@ git checkout master
 git merge develop
 git tag "${VERSION}"
 git push
+git push --tags
 git checkout develop
 git push

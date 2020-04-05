@@ -19,6 +19,7 @@ const createIotes: CreateIotes = ({
 }): Iotes => {
     // Set up logger
     EnvironmentObject.logger = createLogger(logger, logLevel)
+    const env = EnvironmentObject
 
     // Set up stores
     EnvironmentObject.stores = {
@@ -27,7 +28,7 @@ const createIotes: CreateIotes = ({
         device$: createStore(),
     }
 
-    EnvironmentObject.logger.info('Set up store')
+    env.logger.info('Set up store')
 
     const { host$, device$ } = EnvironmentObject.stores
 
@@ -47,12 +48,14 @@ const createIotes: CreateIotes = ({
         hostSubscribe: host$.subscribe,
         deviceSubscribe: device$.subscribe,
         // wrap dispatch with source value
-        hostDispatch: (dispatchable: Dispatchable) => {
-            const hostDispatchable = { [dispatchable.name]: { ...dispatchable, '@@source': 'APP', '@@bus': 'HOST' } }
+        hostDispatch: (dispatchable: any) => {
+            env.logger.info(`Host dispatch recieved ${dispatchable}`)
+            const hostDispatchable = Object.keys(dispatchable).map((key) => ({ [key]: { ...dispatchable[key], '@@source': 'APP', '@@bus': 'DEVICE' } }))[0]
             host$.dispatch(hostDispatchable)
         },
-        deviceDispatch: (dispatchable: Dispatchable) => {
-            const deviceDispatchable = { [dispatchable.name]: { ...dispatchable, '@@source': 'APP', '@@bus': 'DEVICE' } }
+        deviceDispatch: (dispatchable: any) => {
+            env.logger.info(`Device dispatch recieved ${JSON.stringify(dispatchable, null, 2)}`)
+            const deviceDispatchable = Object.keys(dispatchable).map((key) => ({ [key]: { ...dispatchable[key], '@@source': 'APP', '@@bus': 'HOST' } }))[0]
             device$.dispatch(deviceDispatchable)
         },
     })
