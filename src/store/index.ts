@@ -5,10 +5,16 @@ import {
     Selector,
     Subscriber,
     Subscription,
+    Metadata,
 } from '../types'
 import { EnvironmentObject } from '../environment'
 
+const createDefaultMetadata: Metadata = () => ({
+    '@@timestamp': Date.now().toString(),
+})
+
 export const createStore = (
+    metadata: Metadata = createDefaultMetadata,
     errorHandler?: (error: Error, currentState?: State) => State,
 ): Store => {
     const { logger } = EnvironmentObject
@@ -45,8 +51,15 @@ export const createStore = (
         })
     }
 
-    const isObjectLiteral = (testCase:{[key: string]: any}) => {
+    const isObjectLiteral = (testCase:{[key: string] : {[key: string]: any}}) => {
         if (Object.getPrototypeOf(testCase) !== Object.getPrototypeOf({})) return false
+
+
+        if (Object.keys(testCase).some((e) => (
+            Object.getPrototypeOf(testCase[e]) !== Object.getPrototypeOf({})
+        ))) {
+            return false
+        }
 
         let keys = []
         try {
@@ -61,7 +74,13 @@ export const createStore = (
 
     const unwrapDispatchable = (dispatchable: Dispatchable): [State, ShouldUpdateState] => {
         if (dispatchable instanceof Error) return [errorHandler(dispatchable, state), false]
-        if (isObjectLiteral(dispatchable)) return [dispatchable, true]
+        if (isObjectLiteral(dispatchable)) {
+            const metaDispatchable = Object.keys(dispatchable).reduce((a, key) => (
+                { ...a, [key]: { ...dispatchable[key], ...metadata() } }
+            ), {})
+
+            return [metaDispatchable, true]
+        }
         return [{}, false]
     }
 

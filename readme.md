@@ -187,9 +187,8 @@ hostSubscribe((state: State) => console.log(state))
 
 # Contribution
 
-cote is under constant development, and has several important issues still open.
-to see where we are in
-the development, picked an issue of your taste and gave us a hand.
+iotes is under constant development, and has several important issues still open.
+to see where we are in the development, picked an issue of your taste and gave us a hand.
 
 If you would like to see a feature implemented or want to contribute a new
 feature, you are welcome to open an issue to discuss it and we will be more than

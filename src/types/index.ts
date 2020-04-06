@@ -21,7 +21,7 @@ export type DeviceMap<DeviceTypes> = DeviceConfig<DeviceTypes> []
 export type DeviceConfig<DeviceTypes> = {
     type: DeviceTypes
     name: string,
-    channel: number,
+    channel?: number,
     hostName: string
 }
 
@@ -34,6 +34,12 @@ export type DeviceFactory<DeviceTypes extends string> = {
         channel: number
     }>
 }
+
+// Store
+export type Metadata<Meta extends {[key: string]: string | number} = {
+  '@@timestamp': string
+}> = () => Meta
+
 
 // Integration
 export type Integration = <StrategyConfig, DeviceTypes extends string>(
@@ -59,7 +65,7 @@ export interface Logger {
 export type LogLevel = 'SILENT' | 'INFO' | 'LOG' | 'WARN' | 'DEBUG' | 'ERROR'
 
 // Dispatchables
-export type State = { [key: string]: any }
+export type State = { [key: string]: {[key: string] : any} }
 
 export type Dispatchable = State | Error
 
@@ -68,18 +74,18 @@ export type ErrorDispatchable = {
     error?: { message: string, code?: string, level: LogLevel }
 }
 
-export type DeviceDispatchable = {[key: string] : {
+export type DeviceDispatchable<Payload = any> = {[name: string] : {
     name: string,
     type: string,
-    meta: { timestamp: string, channel: string, host: string },
-    payload: {[key: string]: any}
-} | Error }
+    meta: { timestamp: string, channel?: number, host: string },
+    payload: {[key: string]: Payload}
+} & ErrorDispatchable }
 
-export type HostDispatchable = { [key: string] : {
+export type HostDispatchable<Payload = any> = { [name: string] : {
     type: HostConnectionType
     name: string
-    meta: { timestamp: string, channel: string, host: string }
-    payload: {[key: string]: any}
+    meta: { timestamp: string, channel?: number, host: string }
+    payload: {[key: string]: Payload}
 } & ErrorDispatchable }
 
 export type Subscription = (state: State) => any
@@ -110,7 +116,6 @@ export type Strategy<StrategyConfig, DeviceTypes extends string> = (
 // Iotes
 
 // This is the return type without plugins
-
 export type Iotes = {
     hostDispatch: (dispatchable: HostDispatchable) => void,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,

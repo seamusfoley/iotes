@@ -3,6 +3,7 @@ import { EnvironmentObject } from './environment'
 import { createLogger } from './logger'
 import { createIntegration } from './integration'
 import { identityPlugin } from './plugins/identity'
+import { createHostDispatchable, createDeviceDispatchable } from './utils'
 
 import {
     Dispatchable,

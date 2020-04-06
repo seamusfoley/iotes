@@ -35,7 +35,7 @@ const createDeviceDispatchable = (
     [deviceName]: {
         name: deviceName,
         type,
-        meta: { timestamp: '1234', channel: 'local', host: 'local' },
+        meta: { timestamp: '1234', host: 'local' },
         payload,
     },
 })
@@ -75,13 +75,22 @@ describe('Store module ', () => {
     test('Can dispatch ', () => {
         let result: any = null
         localStore.subscribe((state) => { result = state })
-        localStore.dispatch({ payload: 'test' })
-        expect(result.payload).toBe('test')
+        localStore.dispatch({ test: { payload: 'test' } })
+        expect(result.test.payload).toBe('test')
     })
+
+    test('Inserts metadata correctly ', () => {
+        let result: any = null
+        localStore.subscribe((state) => { result = state })
+        localStore.dispatch({ test: { payload: 'test' } })
+        expect(result).toMatchObject({ test: { payload: 'test' } })
+    })
+
 
     test('Handles malformed dispatch ', () => {
         let result: any = null
         localStore.subscribe((state) => { result = state })
+        localStore.dispatch({ test: { payload: 'test' } })
         // @ts-ignore
         localStore.dispatch('what')
         // @ts-ignore
@@ -97,7 +106,7 @@ describe('Store module ', () => {
         // @ts-ignore
         localStore.dispatch(1)
 
-        expect(result).toStrictEqual({ payload: 'test' })
+        expect(result.test.payload).toBe('test')
     })
 
     test('Handles multiple devices correctly', () => {
@@ -108,18 +117,17 @@ describe('Store module ', () => {
         localStore.dispatch(createDeviceDispatchable('RFID_READER', 'reader/2', { sample: 'test' }))
         localStore.dispatch(createDeviceDispatchable('RFID_READER', 'reader/1', { sample: 'newTest' }))
 
-
-        expect(result).toStrictEqual({
+        expect(result).toMatchObject({
             'reader/1': {
                 name: 'reader/1',
                 type: 'RFID_READER',
-                meta: { timestamp: '1234', channel: 'local', host: 'local' },
+                meta: { timestamp: '1234', host: 'local' },
                 payload: { sample: 'newTest' },
             },
             'reader/2': {
                 type: 'RFID_READER',
                 name: 'reader/2',
-                meta: { timestamp: '1234', channel: 'local', host: 'local' },
+                meta: { timestamp: '1234', host: 'local' },
                 payload: { sample: 'test' },
             },
         })
@@ -203,7 +211,7 @@ describe('Strategy implementation ', () => {
 
         // inline updates dont work corrctly. check store update method
 
-        expect(result[deviceName].payload).toStrictEqual({ signal: 'test' })
+        expect(result[deviceName].payload).toEqual({ signal: 'test' })
     })
 
     test('App dispatched to Integration host correctly', async () => {
@@ -218,6 +226,6 @@ describe('Strategy implementation ', () => {
             rej(Error('Result Empty'))
         }, 500))
 
-        expect(result[hostName].payload).toStrictEqual({ signal })
+        expect(result[hostName].payload).toEqual({ signal })
     })
 })
