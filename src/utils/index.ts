@@ -24,10 +24,7 @@ export const createHostDispatchable = <Payload = any>(
         [name]: {
             type,
             name,
-            meta: {
-                timestamp: Date.now().toString(),
-                host: '',
-            },
+            meta: {},
             payload,
         },
     })

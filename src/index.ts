@@ -3,13 +3,24 @@ import { EnvironmentObject } from './environment'
 import { createLogger } from './logger'
 import { createIntegration } from './integration'
 import { identityPlugin } from './plugins/identity'
-import { createHostDispatchable, createDeviceDispatchable } from './utils'
 
 import {
-    Dispatchable,
     Iotes,
     CreateIotes,
+    DeviceDispatchable,
+    HostDispatchable,
 } from './types'
+
+const insertMetadata = (
+    dispatchable: HostDispatchable | DeviceDispatchable,
+    meta: {[key: string]: string | number},
+) => (
+    Object.keys(dispatchable).reduce((a, key) => ({
+        ...a,
+        [key]: { ...dispatchable[key], ...meta },
+    }), {})
+)
+
 
 const createIotes: CreateIotes = ({
     topology,
@@ -29,8 +40,6 @@ const createIotes: CreateIotes = ({
         device$: createStore(),
     }
 
-    env.logger.info('Set up store')
-
     const { host$, device$ } = EnvironmentObject.stores
 
     try {
@@ -45,18 +54,20 @@ const createIotes: CreateIotes = ({
         throw Error('Failed to create Integration for unknown reasons. Did you pass the result of a function call instead of a function?')
     }
 
+    const { client } = topology
+
     return plugin({
         hostSubscribe: host$.subscribe,
         deviceSubscribe: device$.subscribe,
         // wrap dispatch with source value
-        hostDispatch: (dispatchable: any) => {
+        hostDispatch: (dispatchable: HostDispatchable) => {
             env.logger.info(`Host dispatch recieved ${dispatchable}`)
-            const hostDispatchable = Object.keys(dispatchable).map((key) => ({ [key]: { ...dispatchable[key], '@@source': 'APP', '@@bus': 'DEVICE' } }))[0]
+            const hostDispatchable = insertMetadata(dispatchable, { '@@source': client.name, '@@bus': 'Host' })
             host$.dispatch(hostDispatchable)
         },
-        deviceDispatch: (dispatchable: any) => {
+        deviceDispatch: (dispatchable: DeviceDispatchable) => {
             env.logger.info(`Device dispatch recieved ${JSON.stringify(dispatchable, null, 2)}`)
-            const deviceDispatchable = Object.keys(dispatchable).map((key) => ({ [key]: { ...dispatchable[key], '@@source': 'APP', '@@bus': 'HOST' } }))[0]
+            const deviceDispatchable = insertMetadata(dispatchable, { '@@source': client.name, '@@bus': 'Device' })
             device$.dispatch(deviceDispatchable)
         },
     })

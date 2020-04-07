@@ -10,6 +10,7 @@ import { createStore } from '../src/store'
 type DeviceTypes = 'RFID_READER' | 'ROTARY_ENCODER'
 
 const testTopologoy: TopologyMap<{}, DeviceTypes> = {
+    client: { name: 'test' },
     hosts: [{ name: 'testapp/0', host: 'localhost', port: '8888' }],
     devices: [
         {
@@ -208,10 +209,25 @@ describe('Strategy implementation ', () => {
 
         localModule.deviceDispatch(createDeviceDispatchable('RFID_READER', deviceName, { signal: 'test' }))
 
-
-        // inline updates dont work corrctly. check store update method
-
         expect(result[deviceName].payload).toEqual({ signal: 'test' })
+    })
+
+    test('Metadata is instered correctly', async () => {
+        let result: any = {}
+        const deviceName = 'READER/1'
+        localStore.subscribe((state) => { result = state })
+
+        await new Promise((res, rej) => setTimeout(() => {
+            if (result) {
+                res()
+            }
+            rej()
+        }, 100))
+
+        localModule.deviceDispatch(createDeviceDispatchable('RFID_READER', deviceName, { signal: 'test' }))
+
+        expect(result[deviceName]).toHaveProperty('@@source')
+        expect(result[deviceName]).toHaveProperty('@@bus')
     })
 
     test('App dispatched to Integration host correctly', async () => {
@@ -225,6 +241,7 @@ describe('Strategy implementation ', () => {
             }
             rej(Error('Result Empty'))
         }, 500))
+
 
         expect(result[hostName].payload).toEqual({ signal })
     })

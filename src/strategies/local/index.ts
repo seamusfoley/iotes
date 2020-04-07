@@ -8,8 +8,8 @@ import {
     HostConnectionType,
     Strategy,
     Store,
+    ClientConfig,
 } from '../../types'
-import { EnvironmentObject } from '../../environment'
 import { createStore } from '../../store'
 
 type DeviceTypes = 'RFID_READER' | 'ROTARY_ENCODER'
@@ -24,7 +24,7 @@ const createHostDispatchable = (
         name,
         meta: {
             timestamp: Date.now().toString(),
-            channel: 'local',
+            channel: 2,
             host: name,
         },
         payload,
@@ -33,6 +33,7 @@ const createHostDispatchable = (
 
 const createDeviceFactory = async <StrategyConfig> (
     hostConfig: HostConfig<StrategyConfig>,
+    client: ClientConfig,
     deviceDispatch: (dispatchable: DeviceDispatchable) => void,
     deviceSubscribe: any,
     store: Store,
@@ -47,7 +48,7 @@ const createDeviceFactory = async <StrategyConfig> (
             name: deviceName,
             meta: {
                 timestamp: Date.now().toString(),
-                channel: 'local',
+                channel: 2,
                 host: hostConfig.name,
             },
             payload,
@@ -59,7 +60,7 @@ const createDeviceFactory = async <StrategyConfig> (
         const { name, type } = device
 
         deviceSubscribe((state: any) => {
-            if (state[name] && state[name]['@@source'] === 'APP') {
+            if (state[name] && state[name]['@@source'] === client.name) {
                 store.dispatch({ [name]: state[name] })
             }
         })
@@ -79,7 +80,7 @@ const createDeviceFactory = async <StrategyConfig> (
 
         // resigster trasmitter
         deviceSubscribe((state: any) => {
-            if (state[name] && state[name]['@@source'] === 'APP') {
+            if (state[name] && state[name]['@@source'] === client.name) {
                 store.dispatch({ [name]: state[name] })
             }
         })
@@ -112,10 +113,9 @@ export const createLocalStoreAndStrategy = (): [Store, Strategy<undefined, Devic
             deviceSubscribe: any,
         ): HostFactory<StrategyConfig, DeviceTypes> => async (
             hostConfig: HostConfig<StrategyConfig>,
+            clientConfig: ClientConfig,
         ): Promise<DeviceFactory<DeviceTypes>> => {
-            const { logger } = EnvironmentObject
-
-            const { name } = hostConfig
+            const { name } = clientConfig
 
             hostSubscribe((state: any) => {
                 store$.dispatch(
@@ -137,6 +137,7 @@ export const createLocalStoreAndStrategy = (): [Store, Strategy<undefined, Devic
 
             return createDeviceFactory(
                 hostConfig,
+                clientConfig,
                 deviceDispatch,
                 deviceSubscribe,
                 store$,

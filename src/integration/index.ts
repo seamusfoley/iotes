@@ -4,6 +4,7 @@ import {
     Integration,
     HostFactory,
     TopologyMap,
+    ClientConfig,
 } from '../types'
 import { EnvironmentObject } from '../environment'
 
@@ -12,12 +13,12 @@ export const createIntegration: Integration = <StrategyConfig, DeviceTypes exten
     topologyMap: TopologyMap<StrategyConfig, DeviceTypes>,
 ): void => {
     const { logger } = EnvironmentObject
-    const { hosts, devices } = topologyMap
+    const { hosts, devices, client } = topologyMap
 
     Promise.all(
         hosts.map(async (hostConfig: HostConfig<StrategyConfig>) => {
             logger.info(`Creating host ${hostConfig.name}`)
-            const deviceFactory = await hostFactory(hostConfig).catch(() => {
+            const deviceFactory = await hostFactory(hostConfig, client).catch(() => {
                 throw Error(`Failed to create Factory ${hostConfig.name})`)
             })
             return [hostConfig.name, deviceFactory]
@@ -31,7 +32,7 @@ export const createIntegration: Integration = <StrategyConfig, DeviceTypes exten
             devices.map((device) => {
                 // Select device creation method from correct host
                 logger.info(`Creating device of type: ${device.type} on ${device.hostName}`)
-                return deviceFactoriesIndex[device.hostName][device.type](device)
+                return deviceFactoriesIndex[device.hostName][device.type]({ ...device, client })
                     .catch((error: any) => {
                         console.warn(`Failed to create Device ${device.name}, details: ${error}`)
                     })
