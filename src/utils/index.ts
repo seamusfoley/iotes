@@ -1,10 +1,15 @@
-import { DeviceDispatchable, HostDispatchable, HostConnectionType } from '../types'
+import {
+    DeviceDispatchable, HostDispatchable, HostConnectionType,
+    CreateDeviceDispatchable, CreateHostDispatchable,
+} from '../types'
 
-export const createDeviceDispatchable = <Types extends string = string, Payload = any>(
-    name: string,
-    type: Types,
-    payload = {},
-): DeviceDispatchable<Payload> => ({
+export const createDeviceDispatchable: CreateDeviceDispatchable = <
+Types extends string = string, Payload = any
+>(
+        name: string,
+        type: Types,
+        payload = {},
+    ): DeviceDispatchable<Payload> => ({
         [name]: {
             type,
             name,
@@ -16,7 +21,7 @@ export const createDeviceDispatchable = <Types extends string = string, Payload 
         },
     })
 
-export const createHostDispatchable = <Payload = any>(
+export const createHostDispatchable: CreateHostDispatchable = <Payload = any>(
     name: string,
     type: HostConnectionType,
     payload = {},

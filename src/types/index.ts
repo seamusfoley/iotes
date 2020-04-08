@@ -180,6 +180,25 @@ export type CreateIotes = <StrategyConfig, DeviceTypes extends string>(config: {
     logger?: Logger
 }) => Iotes
 
-declare const createIotes: CreateIotes
+export type CreateHostDispatchable = <
+  Payload = any
+>(
+  name: string,
+  type: HostConnectionType,
+  payload: Payload,
+) => HostDispatchable<Payload>
 
-export { createIotes }
+export type CreateDeviceDispatchable = <
+  DeviceDispatchableType extends string = string,
+  Payload = any
+>(
+  name: string,
+  type: DeviceDispatchableType,
+  payload: Payload,
+) => DeviceDispatchable<Payload>
+
+declare const createIotes: CreateIotes
+declare const createDeviceDipatchable: CreateDeviceDispatchable
+declare const createHostDispatchable: CreateHostDispatchable
+
+export { createIotes, createDeviceDipatchable, createHostDispatchable }
