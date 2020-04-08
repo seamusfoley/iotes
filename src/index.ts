@@ -11,6 +11,11 @@ import {
     HostDispatchable,
 } from './types'
 
+import {
+    createDeviceDispatchable,
+    createHostDispatchable,
+} from './utils'
+
 const insertMetadata = (
     dispatchable: HostDispatchable | DeviceDispatchable,
     meta: {[key: string]: string | number},
@@ -75,4 +80,6 @@ const createIotes: CreateIotes = ({
 
 export {
     createIotes,
+    createDeviceDispatchable,
+    createHostDispatchable,
 }
