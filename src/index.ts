@@ -43,12 +43,12 @@ const createIotes: CreateIotes = ({
     const { host$, device$ } = EnvironmentObject.stores
 
     try {
-        createIntegration(strategy(
-            host$.dispatch,
-            device$.dispatch,
-            host$.subscribe,
-            device$.subscribe,
-        ), topology)
+        createIntegration(strategy({
+            hostDispatch: host$.dispatch,
+            deviceDispatch: device$.dispatch,
+            hostSubscribe: host$.subscribe,
+            deviceSubscribe: device$.subscribe,
+        }), topology)
     } catch (error) {
         if (error && error.length > 0) { throw Error(error) }
         throw Error('Failed to create Integration for unknown reasons. Did you pass the result of a function call instead of a function?')

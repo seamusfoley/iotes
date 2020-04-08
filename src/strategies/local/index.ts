@@ -9,6 +9,7 @@ import {
     Strategy,
     Store,
     ClientConfig,
+    Iotes,
 } from '../../types'
 import { createStore } from '../../store'
 
@@ -107,15 +108,19 @@ export const createLocalStoreAndStrategy = (): [Store, Strategy<undefined, Devic
     return [
         store$,
         <StrategyConfig>(
-            hostDispatch: (dispatchable: HostDispatchable) => void,
-            deviceDispatch: (dispatchable: DeviceDispatchable) => void,
-            hostSubscribe: any,
-            deviceSubscribe: any,
+            I: Iotes,
         ): HostFactory<StrategyConfig, DeviceTypes> => async (
             hostConfig: HostConfig<StrategyConfig>,
             clientConfig: ClientConfig,
         ): Promise<DeviceFactory<DeviceTypes>> => {
             const { name } = clientConfig
+
+            const {
+                hostDispatch,
+                deviceDispatch,
+                hostSubscribe,
+                deviceSubscribe,
+            } = I
 
             hostSubscribe((state: any) => {
                 store$.dispatch(

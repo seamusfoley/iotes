@@ -152,14 +152,19 @@ export type TopologyMap<StrategyConfig, DeviceTypes extends string> = {
 }
 
 export type Strategy<StrategyConfig, DeviceTypes extends string> = (
-    hostDispatch: (dispatchable: HostDispatchable) => void,
-    deviceDispatch: (dispatchable: DeviceDispatchable) => void,
-    hostSubscribe: (subscriber: (state: State) => void) => void,
-    deviceSubscribe: (subscriber: (state: State) => void) => void,
+  Iotes: Iotes
 ) => HostFactory<StrategyConfig, DeviceTypes>
 // Iotes
 
 // This is the return type without plugins
+
+/**
+   * The Iotes communication methods
+   * @param hostDispatch: Dispatches messages on the host bus
+   * @param deviceDispatch: Dispatches messages on the device bus
+   * @param hostSubscribe: Subscribes to the host bus
+   * @param hostSubscribe: Subscribes to the device bus
+   */
 export type Iotes = {
     hostDispatch: (dispatchable: HostDispatchable) => void
     deviceDispatch: (dispatchable: DeviceDispatchable) => void
