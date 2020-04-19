@@ -193,8 +193,8 @@ export type CreateHostDispatchable = <
 >(
     name: string,
     type: HostConnectionType,
-    payload: Payload,
     source: string,
+    payload: Payload,
     meta?: Meta,
     error?: ErrorDispatchable
 ) => HostDispatchable<Payload>
@@ -206,13 +206,13 @@ export type CreateDeviceDispatchable = <
 >(
     name: string,
     type: DeviceDispatchableType,
-    payload: Payload,
     source: string,
+    payload: Payload,
     meta?: Meta,
     error?: ErrorDispatchable,
 ) => DeviceDispatchable<Payload>
 
-export type LoopbackGuard = <Payload>(
+export type LoopbackGuard = (
     deviceName: string,
     state: State,
     dispatchable: State,

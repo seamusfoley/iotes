@@ -1,7 +1,7 @@
 import {
-    TopologyMap, Store, DeviceDispatchable, Iotes,
+    TopologyMap, Store, Iotes,
 } from '../src/types'
-import { createIotes } from '../src'
+import { createIotes, createDeviceDispatchable } from '../src'
 import { createLocalStoreAndStrategy } from '../src/strategies/local'
 import { createStore } from '../src/store'
 
@@ -27,19 +27,6 @@ const testTopologoy: TopologyMap<{}, DeviceTypes> = {
         },
     ],
 }
-
-const createDeviceDispatchable = (
-    type: string,
-    deviceName: string,
-    payload: {[key: string] : any},
-):DeviceDispatchable => ({
-    [deviceName]: {
-        name: deviceName,
-        type,
-        meta: { timestamp: '1234', host: 'local' },
-        payload,
-    },
-})
 
 // Tests
 
@@ -76,14 +63,14 @@ describe('Store module ', () => {
     test('Can dispatch ', () => {
         let result: any = null
         localStore.subscribe((state) => { result = state })
-        localStore.dispatch({ test: { payload: 'test' } })
+        localStore.dispatch({ test: { payload: 'test', '@@source': 'test' } })
         expect(result.test.payload).toBe('test')
     })
 
     test('Inserts metadata correctly ', () => {
         let result: any = null
         localStore.subscribe((state) => { result = state })
-        localStore.dispatch({ test: { payload: 'test' } })
+        localStore.dispatch({ test: { payload: 'test', '@@source': 'test' } })
         expect(result).toMatchObject({ test: { payload: 'test' } })
     })
 
@@ -91,7 +78,7 @@ describe('Store module ', () => {
     test('Handles malformed dispatch ', () => {
         let result: any = null
         localStore.subscribe((state) => { result = state })
-        localStore.dispatch({ test: { payload: 'test' } })
+        localStore.dispatch({ test: { payload: 'test', '@@source': 'test' } })
         // @ts-ignore
         localStore.dispatch('what')
         // @ts-ignore
@@ -114,9 +101,9 @@ describe('Store module ', () => {
         let result: any = null
         localStore.subscribe((state) => { result = state })
 
-        localStore.dispatch(createDeviceDispatchable('RFID_READER', 'reader/1', { sample: 'test' }))
-        localStore.dispatch(createDeviceDispatchable('RFID_READER', 'reader/2', { sample: 'test' }))
-        localStore.dispatch(createDeviceDispatchable('RFID_READER', 'reader/1', { sample: 'newTest' }))
+        localStore.dispatch(createDeviceDispatchable('reader/1', 'RFID_READER', 'test', { sample: 'test' }, { timestamp: '1234', host: 'local' }))
+        localStore.dispatch(createDeviceDispatchable('reader/2', 'RFID_READER', 'test', { sample: 'test' }, { timestamp: '1234', host: 'local' }))
+        localStore.dispatch(createDeviceDispatchable('reader/1', 'RFID_READER', 'test', { sample: 'newTest' }, { timestamp: '1234', host: 'local' }))
 
         expect(result).toMatchObject({
             'reader/1': {
@@ -207,7 +194,7 @@ describe('Strategy implementation ', () => {
             rej()
         }, 100))
 
-        localModule.deviceDispatch(createDeviceDispatchable('RFID_READER', deviceName, { signal: 'test' }))
+        localModule.deviceDispatch(createDeviceDispatchable(deviceName, 'RFID_READER', 'test', { signal: 'test' }))
 
         expect(result[deviceName].payload).toEqual({ signal: 'test' })
     })
@@ -224,7 +211,7 @@ describe('Strategy implementation ', () => {
             rej()
         }, 100))
 
-        localModule.deviceDispatch(createDeviceDispatchable('RFID_READER', deviceName, { signal: 'test' }))
+        localModule.deviceDispatch(createDeviceDispatchable( deviceName, 'RFID_READER', 'test', { signal: 'test' }))
 
         expect(result[deviceName]).toHaveProperty('@@source')
         expect(result[deviceName]).toHaveProperty('@@bus')
