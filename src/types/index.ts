@@ -66,7 +66,7 @@ export type ClientConfig = {
 // Store
 export type Metadata<Meta extends {[key: string]: string | number | boolean} = {
   '@@timestamp': string,
-  '@@wasHandledByStore': boolean,
+  '@@storeId': string,
 }> = () => Meta
 
 
@@ -94,7 +94,7 @@ export interface Logger {
 export type LogLevel = 'SILENT' | 'INFO' | 'LOG' | 'WARN' | 'DEBUG' | 'ERROR'
 
 // Dispatchables
-export type State = { [key: string]: {[key: string] : unknown, '@@source': string } }
+export type State = { [key: string]: {[key: string] : unknown } }
 
 export type Dispatchable = State | Error
 
@@ -108,7 +108,7 @@ export type DeviceDispatchable<
 > = {[name: string] : {
     name: string,
     type: string,
-    '@@source': string,
+    source: string,
     meta?: {[key: string]: any }
     payload: Payload
     error?: ErrorDispatchable
@@ -124,7 +124,7 @@ export type DeviceDispatchable<
 export type HostDispatchable<Payload = any> = { [name: string] : {
     type: HostConnectionType
     name: string
-    '@@source': string,
+    source: string,
     meta?: {[key: string]: string | number}
     payload: Payload
     error?: ErrorDispatchable
@@ -196,7 +196,7 @@ export type CreateHostDispatchable = <
     type: HostConnectionType,
     source: string,
     payload: Payload,
-    meta?: Meta,
+    meta?: Meta | {},
     error?: ErrorDispatchable
 ) => HostDispatchable<Payload>
 
@@ -209,7 +209,7 @@ export type CreateDeviceDispatchable = <
     type: DeviceDispatchableType,
     source: string,
     payload: Payload,
-    meta?: Meta,
+    meta?: Meta | {},
     error?: ErrorDispatchable,
 ) => DeviceDispatchable<Payload>
 

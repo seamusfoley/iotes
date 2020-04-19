@@ -14,7 +14,6 @@ import {
 import {
     createDeviceDispatchable,
     createHostDispatchable,
-    loopbackGuard,
     insertMetadata,
 } from './utils'
 
@@ -58,14 +57,14 @@ const createIotes: CreateIotes = ({
         // wrap dispatch with source value
         hostDispatch: (dispatchable: HostDispatchable) => {
             env.logger.info(`Host dispatch recieved ${dispatchable}`)
-            const hostDispatchable = insertMetadata(dispatchable, { '@@bus': 'Host' })
+            const hostDispatchable = insertMetadata(dispatchable, { '@@busChannel': 'HOST' })
             host$.dispatch(hostDispatchable)
         },
         deviceDispatch: <Payload extends {[key: string] : any}>(
             dispatchable: DeviceDispatchable<Payload>,
         ) => {
             env.logger.info(`Device dispatch recieved ${JSON.stringify(dispatchable, null, 2)}`)
-            const deviceDispatchable = insertMetadata(dispatchable, { '@@bus': 'Device' })
+            const deviceDispatchable = insertMetadata(dispatchable, { '@@busChannel': 'DEVICE' })
             device$.dispatch(deviceDispatchable)
         },
     })
@@ -75,5 +74,4 @@ export {
     createIotes,
     createDeviceDispatchable,
     createHostDispatchable,
-    loopbackGuard,
 }

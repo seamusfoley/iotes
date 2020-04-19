@@ -9,7 +9,7 @@ import {
     ClientConfig,
     Iotes,
 } from '../../types'
-import { loopbackGuard, createDeviceDispatchable, createHostDispatchable } from '../../utils'
+import { createDeviceDispatchable, createHostDispatchable } from '../../utils'
 import { createStore } from '../../store'
 
 type DeviceTypes = 'RFID_READER' | 'ROTARY_ENCODER'
@@ -31,8 +31,8 @@ const createDeviceFactory = async <StrategyConfig> (
         // resigster trasmitter
         deviceSubscribe((state: any) => {
             let newState: null
-            if (state[name]?.['@@wasHandledByStore']) {
-                const { '@@wasHandledByStore': none, ...ns } = state[name]
+            if (state[name]?.['@@storeId']) {
+                const { '@@storeId': none, ...ns } = state[name]
                 newState = ns
             }
 
@@ -57,8 +57,8 @@ const createDeviceFactory = async <StrategyConfig> (
         // resigster trasmitter
         deviceSubscribe((state: any) => {
             let newState: null
-            if (state[name]?.['@@wasHandledByStore']) {
-                const { '@@wasHandledByStore': none, ...ns } = state[name]
+            if (state[name]?.['@@storeId']) {
+                const { '@@storeId': none, ...ns } = state[name]
                 newState = ns
             }
 

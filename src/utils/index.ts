@@ -5,28 +5,28 @@ import {
 } from '../types'
 
 export const createDeviceDispatchable: CreateDeviceDispatchable = (
-    name, type, source, payload, meta, error,
+    name, type, source, payload, meta = {}, error,
 ) => ({
     [name]: {
         type,
         name,
+        source,
         payload,
         meta,
-        '@@source': source,
         error: error || null,
     },
 })
 
 export const createHostDispatchable: CreateHostDispatchable = (
-    name, type, source, payload, meta, error,
+    name, type, source, payload, meta = {}, error,
 ) => ({
     [name]: {
         type,
         name,
+        source,
         payload,
         meta,
         error: error || null,
-        '@@source': source,
     },
 })
 
@@ -39,14 +39,3 @@ export const insertMetadata = <Payload extends { [key: string]: any }>(
             [key]: { ...dispatchable[key], ...meta },
         }), {})
     )
-
-export const loopbackGuard: LoopbackGuard = (
-    deviceName,
-    state,
-    dispatchable,
-    callback,
-) => {
-    if (state[deviceName]?.['@@source'] !== dispatchable[deviceName]?.['@@source']) {
-        callback()
-    }
-}

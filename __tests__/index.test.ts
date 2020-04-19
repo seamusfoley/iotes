@@ -222,9 +222,7 @@ describe('Strategy implementation ', () => {
 
         localModule.deviceDispatch(createDeviceDispatchable(deviceName, 'RFID_READER', 'tests', { signal: 'test' }))
 
-
-        expect(result[deviceName]).toHaveProperty('@@source')
-        expect(result[deviceName]).toHaveProperty('@@bus')
+        expect(result[deviceName]).toHaveProperty('@@busChannel')
     })
 
     test('App dispatched to Integration host correctly', async () => {

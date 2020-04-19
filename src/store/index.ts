@@ -9,13 +9,19 @@ import {
 } from '../types'
 import { EnvironmentObject } from '../environment'
 
-const createDefaultMetadata: Metadata = () => ({
-    '@@timestamp': Date.now().toString(),
-    '@@wasHandledByStore': true,
-})
+const createStoreId = ():string => `iotes_${Math.random().toString(16).substr(2, 8)}`
+
+const createDefaultMetadata = (): Metadata => {
+    const storeId = createStoreId()
+
+    return () => ({
+        '@@timestamp': Date.now().toString(),
+        '@@storeId': storeId,
+    })
+}
 
 export const createStore = (
-    metadata: Metadata = createDefaultMetadata,
+    metadata: Metadata = createDefaultMetadata(),
     errorHandler?: (error: Error, currentState?: State) => State,
 ): Store => {
     const { logger } = EnvironmentObject
@@ -77,7 +83,7 @@ export const createStore = (
         if (dispatchable instanceof Error) return [errorHandler(dispatchable, state), false]
 
         const deltaDispatchable: State = Object.keys(dispatchable).filter((key: string) => (
-            dispatchable[key] ? !dispatchable[key]['@@wasHandledByStore'] : false
+            dispatchable[key] ? !dispatchable[key]['@@storeId'] : false
         )).reduce(
             (a, key) => ({ ...a, [key]: dispatchable[key] }), {},
         )
