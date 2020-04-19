@@ -101,9 +101,9 @@ describe('Store module ', () => {
         let result: any = null
         localStore.subscribe((state) => { result = state })
 
-        localStore.dispatch(createDeviceDispatchable('reader/1', 'RFID_READER', 'test', { sample: 'test' }, { timestamp: '1234', host: 'local' }))
-        localStore.dispatch(createDeviceDispatchable('reader/2', 'RFID_READER', 'test', { sample: 'test' }, { timestamp: '1234', host: 'local' }))
-        localStore.dispatch(createDeviceDispatchable('reader/1', 'RFID_READER', 'test', { sample: 'newTest' }, { timestamp: '1234', host: 'local' }))
+        localStore.dispatch(createDeviceDispatchable('reader/1', 'RFID_READER', 'app', { sample: 'test' }, { timestamp: '1234', host: 'local' }))
+        localStore.dispatch(createDeviceDispatchable('reader/2', 'RFID_READER', 'app', { sample: 'test' }, { timestamp: '1234', host: 'local' }))
+        localStore.dispatch(createDeviceDispatchable('reader/1', 'RFID_READER', 'app', { sample: 'newTest' }, { timestamp: '1234', host: 'local' }))
 
         expect(result).toMatchObject({
             'reader/1': {
@@ -119,6 +119,15 @@ describe('Store module ', () => {
                 payload: { sample: 'test' },
             },
         })
+    })
+
+    test('Loopback is guarded againsr', () => {
+        let result: any = null
+        localStore.subscribe((state) => { result = state })
+
+        localStore.dispatch(createDeviceDispatchable('reader/1', 'RFID_READER', 'test', { sample: 'test' }))
+
+        // console.log(result)
     })
 })
 
@@ -180,7 +189,6 @@ describe('Strategy implementation ', () => {
         expect(result[testTopologoy.devices[0].name].type).toBe('RFID_READER')
     })
 
-    // TODO fix internal dispatch
 
     test('App dispatched to integrated decives correctly', async () => {
         let result: any = {}
@@ -194,7 +202,8 @@ describe('Strategy implementation ', () => {
             rej()
         }, 100))
 
-        localModule.deviceDispatch(createDeviceDispatchable(deviceName, 'RFID_READER', 'test', { signal: 'test' }))
+
+        localModule.deviceDispatch(createDeviceDispatchable(deviceName, 'RFID_READER', 'tests', { signal: 'test' }))
 
         expect(result[deviceName].payload).toEqual({ signal: 'test' })
     })
@@ -211,7 +220,8 @@ describe('Strategy implementation ', () => {
             rej()
         }, 100))
 
-        localModule.deviceDispatch(createDeviceDispatchable( deviceName, 'RFID_READER', 'test', { signal: 'test' }))
+        localModule.deviceDispatch(createDeviceDispatchable(deviceName, 'RFID_READER', 'tests', { signal: 'test' }))
+
 
         expect(result[deviceName]).toHaveProperty('@@source')
         expect(result[deviceName]).toHaveProperty('@@bus')

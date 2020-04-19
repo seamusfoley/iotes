@@ -7,11 +7,11 @@ import {
     Subscription,
     Metadata,
 } from '../types'
-import { loopbackGuard } from '../utils'
 import { EnvironmentObject } from '../environment'
 
 const createDefaultMetadata: Metadata = () => ({
     '@@timestamp': Date.now().toString(),
+    '@@wasHandledByStore': true,
 })
 
 export const createStore = (
@@ -76,9 +76,16 @@ export const createStore = (
     const unwrapDispatchable = (dispatchable: Dispatchable): [State, ShouldUpdateState] => {
         if (dispatchable instanceof Error) return [errorHandler(dispatchable, state), false]
 
-        if (isObjectLiteral(dispatchable)) {
-            const metaDispatchable = Object.keys(dispatchable).reduce((a, key) => (
-                { ...a, [key]: { ...dispatchable[key], ...metadata() } }
+        const deltaDispatchable: State = Object.keys(dispatchable).filter((key: string) => (
+            dispatchable[key] ? !dispatchable[key]['@@wasHandledByStore'] : false
+        )).reduce(
+            (a, key) => ({ ...a, [key]: dispatchable[key] }), {},
+        )
+
+
+        if (isObjectLiteral(deltaDispatchable)) {
+            const metaDispatchable = Object.keys(deltaDispatchable).reduce((a, key) => (
+                { ...a, [key]: { ...deltaDispatchable[key], ...metadata() } }
             ), {})
 
             return [metaDispatchable, true]
@@ -95,14 +102,7 @@ export const createStore = (
     const dispatch = (dispatchable: Dispatchable) => {
         const [unwrappedDispatchable, shouldUpdateState] = unwrapDispatchable(dispatchable)
 
-        // apply loopback guard
-        const newState = Object.keys(unwrappedDispatchable).filter((deviceName) => (
-            loopbackGuard(deviceName, state, unwrappedDispatchable)
-        )).reduce((a, key) => (
-            { ...a, [key]: unwrappedDispatchable[key] }
-        ), {})
-
-        if (shouldUpdateState) setState(newState, updateSubscribers)
+        if (shouldUpdateState) setState(unwrappedDispatchable, updateSubscribers)
     }
 
     return {

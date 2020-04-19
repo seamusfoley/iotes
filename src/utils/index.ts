@@ -44,4 +44,9 @@ export const loopbackGuard: LoopbackGuard = (
     deviceName,
     state,
     dispatchable,
-) => (state[deviceName]?.['@@source'] !== dispatchable[deviceName]?.['@@source'] || true)
+    callback,
+) => {
+    if (state[deviceName]?.['@@source'] !== dispatchable[deviceName]?.['@@source']) {
+        callback()
+    }
+}

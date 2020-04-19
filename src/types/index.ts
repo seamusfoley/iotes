@@ -64,8 +64,9 @@ export type ClientConfig = {
 }
 
 // Store
-export type Metadata<Meta extends {[key: string]: string | number} = {
-  '@@timestamp': string
+export type Metadata<Meta extends {[key: string]: string | number | boolean} = {
+  '@@timestamp': string,
+  '@@wasHandledByStore': boolean,
 }> = () => Meta
 
 
@@ -216,6 +217,7 @@ export type LoopbackGuard = (
     deviceName: string,
     state: State,
     dispatchable: State,
+    callback: (...args: any[]) => void
 ) => void
 
 declare const createIotes: CreateIotes
