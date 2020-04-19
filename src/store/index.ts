@@ -7,6 +7,7 @@ import {
     Subscription,
     Metadata,
 } from '../types'
+import { loopbackGuard } from '../utils'
 import { EnvironmentObject } from '../environment'
 
 const createDefaultMetadata: Metadata = () => ({
@@ -74,6 +75,7 @@ export const createStore = (
 
     const unwrapDispatchable = (dispatchable: Dispatchable): [State, ShouldUpdateState] => {
         if (dispatchable instanceof Error) return [errorHandler(dispatchable, state), false]
+
         if (isObjectLiteral(dispatchable)) {
             const metaDispatchable = Object.keys(dispatchable).reduce((a, key) => (
                 { ...a, [key]: { ...dispatchable[key], ...metadata() } }
@@ -81,6 +83,7 @@ export const createStore = (
 
             return [metaDispatchable, true]
         }
+
         return [{}, false]
     }
 
@@ -90,7 +93,15 @@ export const createStore = (
     }
 
     const dispatch = (dispatchable: Dispatchable) => {
-        const [newState, shouldUpdateState] = unwrapDispatchable(dispatchable)
+        const [unwrappedDispatchable, shouldUpdateState] = unwrapDispatchable(dispatchable)
+
+        // apply loopback guard
+        const newState = Object.keys(unwrappedDispatchable).filter((deviceName) => (
+            loopbackGuard(deviceName, state, unwrappedDispatchable)
+        )).reduce((a, key) => (
+            { ...a, [key]: unwrappedDispatchable[key] }
+        ), {})
+
         if (shouldUpdateState) setState(newState, updateSubscribers)
     }
 
