@@ -52,8 +52,8 @@ var store_1 = require("../../store");
 var defeatLoopbackGuard = function (deviceName, state) {
     var _a;
     var newState;
-    if ((_a = state[deviceName]) === null || _a === void 0 ? void 0 : _a['@@storeId']) {
-        var _b = state[deviceName], n = _b["@@storeId"], ns = __rest(_b, ['@@storeId']);
+    if ((_a = state[deviceName]) === null || _a === void 0 ? void 0 : _a['@@iotes_storeId']) {
+        var _b = state[deviceName], n = _b["@@iotes_storeId"], ns = __rest(_b, ['@@iotes_storeId']);
         newState = ns;
     }
     return newState || state;

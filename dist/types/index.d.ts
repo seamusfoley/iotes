@@ -48,8 +48,8 @@ export declare type ClientConfig = {
 export declare type Metadata<Meta extends {
     [key: string]: string | number | boolean;
 } = {
-    '@@timestamp': string;
-    '@@storeId': string;
+    '@@iotes_timestamp': string;
+    '@@iotes_storeId': string;
 }> = () => Meta;
 export declare type Integration = <StrategyConfig, DeviceTypes extends string>(hostFactory: HostFactory<StrategyConfig, DeviceTypes>, topologyMap: TopologyMap<StrategyConfig, DeviceTypes>) => void;
 export declare type PhidgetReactConfig = {
