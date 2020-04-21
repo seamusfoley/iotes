@@ -77,7 +77,7 @@ var createDeviceFactory = function (hostConfig, client, deviceDispatch, deviceSu
                                 _a));
                         }, [name]);
                         return [4 /*yield*/, setTimeout(function () {
-                                deviceDispatch(utils_1.createDeviceDispatchable(name, type, 'EXTERNAL', { value: Date.now() }));
+                                deviceDispatch(utils_1.createDeviceDispatchable(name, type, { value: Date.now() }));
                             }, 10)];
                     case 1:
                         _a.sent();
@@ -123,14 +123,14 @@ exports.createLocalStoreAndStrategy = function () {
                         name = clientConfig.name;
                         hostDispatch = I.hostDispatch, deviceDispatch = I.deviceDispatch, hostSubscribe = I.hostSubscribe, deviceSubscribe = I.deviceSubscribe;
                         hostSubscribe(function (state) {
-                            store$.dispatch(utils_1.createHostDispatchable(hostConfig.name, 'CONNECT', 'LOCAL', {
+                            store$.dispatch(utils_1.createHostDispatchable(hostConfig.name, 'CONNECT', {
                                 signal: 'test',
                             }));
                         });
                         // Test host dispatch
                         return [4 /*yield*/, new Promise(function (res) {
                                 setTimeout(function () {
-                                    hostDispatch(utils_1.createHostDispatchable(hostConfig.name, 'CONNECT', 'LOCAL', {}));
+                                    hostDispatch(utils_1.createHostDispatchable(hostConfig.name, 'CONNECT', {}));
                                     res();
                                 }, 10);
                             })];
